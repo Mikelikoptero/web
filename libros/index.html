@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fondo: #f2ecdf;
+      --fondo-tarjeta: #faf6ee;
+      --texto: #3a352d;
+      --texto-suave: #7a7264;
+      --borde: #ddd3c0;
+      --acento: #8a7a5c;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--fondo);
+      color: var(--texto);
+      font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      max-width: 720px;
+      padding: 64px 24px 32px;
+    }
+
+    h1 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 2.6rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .subtitulo {
+      margin-top: 8px;
+      color: var(--texto-suave);
+      font-size: 1rem;
+    }
+
+    main {
+      width: 100%;
+      max-width: 720px;
+      padding: 0 24px 64px;
+    }
+
+    .seccion-titulo {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--texto-suave);
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--borde);
+      padding-bottom: 8px;
+    }
+
+    .tarjeta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .tarjeta:hover {
+      box-shadow: 0 4px 14px rgba(58, 53, 45, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .tarjeta h2 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .tarjeta p {
+      font-size: 0.9rem;
+      color: var(--texto-suave);
+      margin-top: 4px;
+    }
+
+    .boton {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--acento);
+      background-color: transparent;
+      color: var(--acento);
+      font-size: 0.9rem;
+      font-family: inherit;
+      cursor: not-allowed;
+      opacity: 0.6;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .boton.activo {
+      cursor: pointer;
+      opacity: 1;
+    }
+
+    .boton.activo:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: var(--texto-suave);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mi espacio</h1>
+    <p class="subtitulo">Página principal. Desde aquí accedo a mis páginas.</p>
+  </header>
+
+  <main>
+    <p class="seccion-titulo">Páginas</p>
+
+    <div class="tarjeta">
+      <div>
+        <h2>Lista de libros</h2>
+        <p>Libros que quiero leer y libros leídos.</p>
+      </div>
+      <a class="boton activo" href="./libros/">Abrir</a>
+    </div>
+  </main>
+
+  <footer>
+    <p>Web personal</p>
+  </footer>
+</body>
+</html>
