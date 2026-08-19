@@ -271,6 +271,23 @@
       </div>
     </div>
 
+    <div class="menu-desplegable">
+      <button class="boton-menu" id="boton-video" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+        Video
+      </button>
+      <div class="contenido-menu" id="menu-video">
+        <a class="shortcut" href="https://rbtv77apk.app/rbtv77-web/" target="_blank" rel="noopener noreferrer">
+          RBTV77
+        </a>
+        <a class="shortcut" href="https://github.com/yarrlist" target="_blank" rel="noopener noreferrer">
+          Yarrlist
+        </a>
+      </div>
+    </div>
+
     <p class="seccion-titulo">Páginas</p>
 
     <div class="tarjeta">
@@ -286,6 +303,13 @@
   <script>
     document.getElementById('boton-akademia').addEventListener('click', function() {
       var menu = document.getElementById('menu-akademia');
+      var boton = this;
+      menu.classList.toggle('abierto');
+      boton.classList.toggle('abierto');
+    });
+
+    document.getElementById('boton-video').addEventListener('click', function() {
+      var menu = document.getElementById('menu-video');
       var boton = this;
       menu.classList.toggle('abierto');
       boton.classList.toggle('abierto');
