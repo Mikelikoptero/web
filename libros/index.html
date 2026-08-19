@@ -172,26 +172,20 @@
       min-width: 150px;
     }
 
-    .libro .texto {
-      font-size: 0.95rem;
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .libro .texto strong {
+    .libro .info .titulo {
       font-weight: 600;
+      font-size: 0.95rem;
     }
 
-    .libro .texto .autor {
+    .libro .info .autor {
       color: var(--texto-suave);
+      font-size: 0.95rem;
     }
 
     .libro .fecha {
       font-size: 0.8rem;
       color: var(--texto-suave);
-      margin-top: 4px;
+      text-align: right;
     }
 
     .libro .fecha span {
@@ -230,10 +224,10 @@
 
     .libro .acciones {
       display: flex;
-      gap: 8px;
-      align-items: center;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
       flex-shrink: 0;
-      flex-wrap: wrap;
     }
 
     .acciones-fecha {
@@ -369,7 +363,7 @@
       }
 
       .libro .acciones {
-        justify-content: flex-start;
+        align-items: stretch;
         padding-top: 4px;
         border-top: 1px solid var(--borde);
       }
@@ -383,6 +377,10 @@
         flex: 1;
         min-width: 120px;
         max-width: unset;
+      }
+
+      .libro .fecha {
+        text-align: left;
       }
 
       .respaldo {
@@ -496,7 +494,7 @@
       return svg;
     }
 
-    function crearTextoLibro(libro) {
+    function crearTextoLibroParaLeer(libro) {
       var span = document.createElement("span");
       span.className = "texto";
       var strong = document.createElement("strong");
@@ -507,6 +505,23 @@
       autor.textContent = " - " + (libro.autor || "Autor desconocido");
       span.appendChild(autor);
       return span;
+    }
+
+    function crearInfoLibroLeido(libro) {
+      var div = document.createElement("div");
+      div.className = "info";
+
+      var titulo = document.createElement("div");
+      titulo.className = "titulo";
+      titulo.textContent = libro.titulo || "Sin título";
+      div.appendChild(titulo);
+
+      var autor = document.createElement("div");
+      autor.className = "autor";
+      autor.textContent = libro.autor || "Autor desconocido";
+      div.appendChild(autor);
+
+      return div;
     }
 
     function mensajeVacio(texto) {
@@ -622,7 +637,7 @@
         
         var info = document.createElement("div");
         info.className = "info";
-        info.appendChild(crearTextoLibro(libro));
+        info.appendChild(crearTextoLibroParaLeer(libro));
         fila.appendChild(info);
 
         var acciones = document.createElement("div");
@@ -655,22 +670,21 @@
         var fila = document.createElement("div");
         fila.className = "libro";
         
-        var info = document.createElement("div");
-        info.className = "info";
-        info.appendChild(crearTextoLibro(libro));
-        
-        if (libro.fecha) {
-          var fechaSpan = document.createElement("div");
-          fechaSpan.className = "fecha";
-          fechaSpan.innerHTML = '<span>' + formatearFecha(libro.fecha) + '</span>';
-          info.appendChild(fechaSpan);
-        }
-        
-        fila.appendChild(info);
+        fila.appendChild(crearInfoLibroLeido(libro));
 
         var acciones = document.createElement("div");
         acciones.className = "acciones";
         acciones.appendChild(crearEstrellas(libro, indice));
+        
+        var fechaDiv = document.createElement("div");
+        fechaDiv.className = "fecha";
+        if (libro.fecha) {
+          fechaDiv.innerHTML = '<span>' + formatearFecha(libro.fecha) + '</span>';
+        } else {
+          fechaDiv.innerHTML = '<span style="color: var(--texto-suave);">Sin fecha</span>';
+        }
+        acciones.appendChild(fechaDiv);
+        
         acciones.appendChild(crearFecha(libro, indice));
 
         fila.appendChild(acciones);
