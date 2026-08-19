@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akademia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fondo: #f2ecdf;
+      --fondo-tarjeta: #faf6ee;
+      --texto: #3a352d;
+      --texto-suave: #7a7264;
+      --borde: #ddd3c0;
+      --acento: #8a7a5c;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--fondo);
+      color: var(--texto);
+      font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      max-width: 720px;
+      padding: 64px 24px 24px;
+    }
+
+    h1 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 2.6rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .volver {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: var(--texto-suave);
+      text-decoration: none;
+      border-bottom: 1px solid var(--borde);
+      padding-bottom: 1px;
+    }
+
+    .volver:hover {
+      color: var(--acento);
+      border-bottom-color: var(--acento);
+    }
+
+    main {
+      width: 100%;
+      max-width: 720px;
+      padding: 0 24px 64px;
+    }
+
+    .seccion-titulo {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--texto-suave);
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--borde);
+      padding-bottom: 8px;
+    }
+
+    .shortcuts {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .shortcut {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 16px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      background-color: var(--fondo-tarjeta);
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      gap: 8px;
+    }
+
+    .shortcut:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .shortcut svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: var(--texto-suave);
+    }
+
+    @media (max-width: 540px) {
+      .shortcuts {
+        flex-direction: column;
+      }
+
+      .shortcut {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Akademia</h1>
+    <a class="volver" href="../">Volver al inicio</a>
+  </header>
+
+  <main>
+    <p class="seccion-titulo">Recursos</p>
+
+    <div class="shortcuts">
+      <a class="shortcut" href="https://www.desmos.com/calculator?lang=es" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+        Desmos
+      </a>
+      <a class="shortcut" href="https://selectividad.intergranada.com/" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        Intergranada
+      </a>
+      <a class="shortcut" href="https://yoquieroaprobar.es/" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        Yo quiero aprobar
+      </a>
+      <a class="shortcut" href="https://onddiakademia.github.io/TaulaPeriodiko/" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        Taula Periodikoa
+      </a>
+      <a class="shortcut" href="https://sintaxis.org/analizador/" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        Sintaxis
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    <p>Web personal</p>
+  </footer>
+</body>
+</html>
