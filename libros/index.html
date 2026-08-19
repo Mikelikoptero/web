@@ -181,7 +181,6 @@
       color: var(--texto-suave);
     }
 
-    /* Estrellas */
     .estrellas {
       display: flex;
       gap: 2px;
@@ -231,6 +230,39 @@
       display: none;
     }
 
+    /* Botones de respaldo */
+    .respaldo {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--borde);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .respaldo button {
+      padding: 10px 20px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      background-color: var(--fondo-tarjeta);
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .respaldo button:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .respaldo input[type="file"] {
+      display: none;
+    }
+
     footer {
       margin-top: auto;
       padding: 24px;
@@ -262,6 +294,14 @@
       .libro .acciones {
         flex: 1 1 100%;
         justify-content: flex-end;
+      }
+
+      .respaldo {
+        flex-direction: column;
+      }
+
+      .respaldo button {
+        width: 100%;
       }
     }
   </style>
@@ -295,6 +335,13 @@
     <div id="vista-leidos" class="oculto">
       <div id="lista-leidos"></div>
     </div>
+
+    <!-- Botones de respaldo -->
+    <div class="respaldo">
+      <button id="btn-exportar" type="button">📥 Exportar datos (JSON)</button>
+      <button id="btn-importar" type="button">📤 Importar datos (JSON)</button>
+      <input type="file" id="input-archivo" accept=".json">
+    </div>
   </main>
 
   <footer>
@@ -314,6 +361,9 @@
     var tabLeidos = document.getElementById("tab-leidos");
     var vistaParaLeer = document.getElementById("vista-para-leer");
     var vistaLeidos = document.getElementById("vista-leidos");
+    var btnExportar = document.getElementById("btn-exportar");
+    var btnImportar = document.getElementById("btn-importar");
+    var inputArchivo = document.getElementById("input-archivo");
 
     function cargar(clave) {
       try {
@@ -345,11 +395,11 @@
       var span = document.createElement("span");
       span.className = "texto";
       var strong = document.createElement("strong");
-      strong.textContent = libro.titulo;
+      strong.textContent = libro.titulo || "Sin título";
       span.appendChild(strong);
       var autor = document.createElement("span");
       autor.className = "autor";
-      autor.textContent = " - " + libro.autor;
+      autor.textContent = " - " + (libro.autor || "Autor desconocido");
       span.appendChild(autor);
       return span;
     }
@@ -365,7 +415,6 @@
       var contenedor = document.createElement("div");
       contenedor.className = "estrellas";
 
-      // Si el libro no tiene puntuación, inicializarla a 0
       if (typeof libro.puntuacion === 'undefined') {
         libro.puntuacion = 0;
       }
@@ -470,7 +519,6 @@
       var paraLeer = cargar(CLAVE_PARA_LEER);
       var leidos = cargar(CLAVE_LEIDOS);
       var libro = paraLeer.splice(indice, 1)[0];
-      // Inicializar puntuación a 0 al mover a leídos
       libro.puntuacion = 0;
       leidos.unshift(libro);
       guardar(CLAVE_PARA_LEER, paraLeer);
@@ -494,6 +542,58 @@
       renderLeidos();
     }
 
+    // ===== FUNCIONES DE RESPALDO =====
+    
+    function exportarDatos() {
+      var datos = {
+        paraLeer: cargar(CLAVE_PARA_LEER),
+        leidos: cargar(CLAVE_LEIDOS),
+        fecha: new Date().toISOString()
+      };
+      
+      var blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "libros_backup_" + new Date().toISOString().slice(0,10) + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importarDatos(evento) {
+      var archivo = evento.target.files[0];
+      if (!archivo) return;
+
+      var lector = new FileReader();
+      lector.onload = function(e) {
+        try {
+          var datos = JSON.parse(e.target.result);
+          
+          // Validar que el archivo tenga el formato correcto
+          if (typeof datos.paraLeer !== 'undefined' && typeof datos.leidos !== 'undefined') {
+            if (confirm("¿Importar datos? Se sobrescribirán los datos actuales.")) {
+              guardar(CLAVE_PARA_LEER, datos.paraLeer);
+              guardar(CLAVE_LEIDOS, datos.leidos);
+              renderParaLeer();
+              renderLeidos();
+              alert("Datos importados correctamente.");
+            }
+          } else {
+            alert("El archivo no tiene el formato correcto.");
+          }
+        } catch (error) {
+          alert("Error al leer el archivo: " + error.message);
+        }
+      };
+      lector.readAsText(archivo);
+      
+      // Resetear el input para permitir importar el mismo archivo de nuevo
+      inputArchivo.value = "";
+    }
+
+    // Event listeners
     botonAnadir.addEventListener("click", anadirLibro);
     inputAutor.addEventListener("keydown", function (e) {
       if (e.key === "Enter") anadirLibro();
@@ -503,6 +603,11 @@
     });
     tabParaLeer.addEventListener("click", mostrarParaLeer);
     tabLeidos.addEventListener("click", mostrarLeidos);
+    btnExportar.addEventListener("click", exportarDatos);
+    btnImportar.addEventListener("click", function() {
+      inputArchivo.click();
+    });
+    inputArchivo.addEventListener("change", importarDatos);
 
     renderParaLeer();
   </script>
