@@ -112,10 +112,52 @@
       flex-shrink: 0;
     }
 
+    /* Botón para mostrar/ocultar horario */
+    .boton-horario {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      margin-bottom: 16px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      background-color: var(--fondo-tarjeta);
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .boton-horario:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .boton-horario svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .boton-horario.abierto svg {
+      transform: rotate(180deg);
+    }
+
+    /* Contenedor del horario */
+    .horario-wrapper {
+      display: none;
+      margin-bottom: 24px;
+    }
+
+    .horario-wrapper.visible {
+      display: block;
+    }
+
     /* Tabla de horario */
     .horario-container {
       overflow-x: auto;
-      margin-bottom: 24px;
     }
 
     .horario {
@@ -302,34 +344,43 @@
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
         </svg>
-        Sintaxia
+        Sintaxis
       </a>
     </div>
 
     <p class="seccion-titulo">Ordutegia</p>
 
-    <div class="horario-container">
-      <table class="horario" id="tabla-horario">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Astelehena</th>
-            <th>Asteartea</th>
-            <th>Asteazkena</th>
-            <th>Osteguna</th>
-            <th>Ostirala</th>
-          </tr>
-        </thead>
-        <tbody id="cuerpo-horario">
-          <!-- JavaScript-rekin sortzen da -->
-        </tbody>
-      </table>
-    </div>
+    <button class="boton-horario" id="boton-horario" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+      Erakutsi ordutegia
+    </button>
 
-    <div class="respaldo">
-      <button id="btn-exportar-horario" type="button">Ordutegia esportatu</button>
-      <button id="btn-importar-horario" type="button">Ordutegia inportatu</button>
-      <input type="file" id="input-archivo-horario" accept=".json">
+    <div class="horario-wrapper" id="horario-wrapper">
+      <div class="horario-container">
+        <table class="horario" id="tabla-horario">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Astelehena</th>
+              <th>Asteartea</th>
+              <th>Asteazkena</th>
+              <th>Osteguna</th>
+              <th>Ostirala</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpo-horario">
+            <!-- JavaScript-rekin sortzen da -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="respaldo">
+        <button id="btn-exportar-horario" type="button">Ordutegia esportatu</button>
+        <button id="btn-importar-horario" type="button">Ordutegia inportatu</button>
+        <input type="file" id="input-archivo-horario" accept=".json">
+      </div>
     </div>
 
   </main>
@@ -343,7 +394,35 @@
 
     var horas = ['16:00', '17:00', '18:00', '19:00'];
     var dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
-    var diasNombres = ['Astelehena', 'Asteartea', 'Asteazkena', 'Osteguna', 'Ostirala'];
+
+    var botonHorario = document.getElementById('boton-horario');
+    var horarioWrapper = document.getElementById('horario-wrapper');
+
+    // Estado del horario (abierto/cerrado)
+    var horarioAbierto = false;
+
+    botonHorario.addEventListener('click', function() {
+      horarioAbierto = !horarioAbierto;
+      if (horarioAbierto) {
+        horarioWrapper.classList.add('visible');
+        botonHorario.classList.add('abierto');
+        botonHorario.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+          Ezkutatu ordutegia
+        `;
+      } else {
+        horarioWrapper.classList.remove('visible');
+        botonHorario.classList.remove('abierto');
+        botonHorario.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+          Erakutsi ordutegia
+        `;
+      }
+    });
 
     function cargarHorario() {
       try {
@@ -352,7 +431,6 @@
           return data;
         }
       } catch (e) {}
-      // Gelaxka hutsik: 5 lerro
       return Array(horas.length).fill(null).map(function() {
         return Array(dias.length).fill(null).map(function() {
           return ['', '', '', '', ''];
@@ -372,7 +450,6 @@
       for (var i = 0; i < horas.length; i++) {
         var tr = document.createElement('tr');
         
-        // Orduaren gelaxka
         var tdHora = document.createElement('td');
         tdHora.className = 'hora';
         tdHora.textContent = horas[i];
@@ -384,7 +461,6 @@
           var celda = document.createElement('div');
           celda.className = 'celda fila-' + i;
           
-          // 5 lerro gelaxka bakoitzeko
           for (var k = 0; k < 5; k++) {
             var input = document.createElement('input');
             input.type = 'text';
