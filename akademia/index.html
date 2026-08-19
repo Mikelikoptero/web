@@ -15,11 +15,6 @@
       --texto-suave: #7a7264;
       --borde: #ddd3c0;
       --acento: #8a7a5c;
-      --lunes: #fde8e8;
-      --martes: #fde8f0;
-      --miercoles: #f0e8fd;
-      --jueves: #e8f0fd;
-      --viernes: #e8fde8;
     }
 
     * {
@@ -126,15 +121,16 @@
     .horario {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
 
     .horario th,
     .horario td {
       border: 1px solid var(--borde);
-      padding: 4px;
+      padding: 2px;
       text-align: center;
-      min-width: 60px;
+      min-width: 80px;
+      vertical-align: top;
     }
 
     .horario th {
@@ -144,6 +140,7 @@
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      padding: 6px 4px;
     }
 
     .horario .hora {
@@ -151,38 +148,49 @@
       font-weight: 500;
       color: var(--texto-suave);
       font-size: 0.75rem;
-      min-width: 50px;
+      min-width: 45px;
+      vertical-align: middle;
+      padding: 4px 6px;
     }
 
-    .horario td input {
+    .horario td .celda {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding: 2px;
+    }
+
+    .horario td .celda input {
       width: 100%;
       border: none;
       background: transparent;
       text-align: center;
       font-family: inherit;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       color: var(--texto);
       outline: none;
-      padding: 4px 2px;
-      min-height: 32px;
+      padding: 2px 2px;
+      min-height: 18px;
+      border-radius: 2px;
+      transition: background-color 0.15s ease;
     }
 
-    .horario td input:focus {
-      background-color: rgba(138, 122, 92, 0.08);
-      border-radius: 4px;
+    .horario td .celda input:focus {
+      background-color: rgba(138, 122, 92, 0.12);
     }
 
-    .horario td input::placeholder {
+    .horario td .celda input::placeholder {
       color: var(--texto-suave);
-      opacity: 0.4;
-      font-size: 0.7rem;
+      opacity: 0.3;
+      font-size: 0.6rem;
     }
 
-    .horario .lunes { background-color: var(--lunes); }
-    .horario .martes { background-color: var(--martes); }
-    .horario .miercoles { background-color: var(--miercoles); }
-    .horario .jueves { background-color: var(--jueves); }
-    .horario .viernes { background-color: var(--viernes); }
+    /* Colores pastel para cada celda */
+    .horario td .celda.fila-0 { background-color: #fde8e8; }
+    .horario td .celda.fila-1 { background-color: #fde8f0; }
+    .horario td .celda.fila-2 { background-color: #f0e8fd; }
+    .horario td .celda.fila-3 { background-color: #e8f0fd; }
+    .horario td .celda.fila-4 { background-color: #e8fde8; }
 
     /* Botones de respaldo */
     .respaldo {
@@ -223,24 +231,30 @@
 
     @media (max-width: 640px) {
       .horario {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
       }
 
       .horario th,
       .horario td {
-        padding: 2px;
-        min-width: 40px;
+        padding: 1px;
+        min-width: 50px;
       }
 
-      .horario td input {
-        font-size: 0.7rem;
-        min-height: 24px;
-        padding: 2px;
+      .horario td .celda input {
+        font-size: 0.6rem;
+        min-height: 14px;
+        padding: 1px;
       }
 
       .horario .hora {
-        min-width: 35px;
-        font-size: 0.65rem;
+        min-width: 30px;
+        font-size: 0.6rem;
+        padding: 2px 4px;
+      }
+
+      .horario th {
+        font-size: 0.6rem;
+        padding: 4px 2px;
       }
     }
   </style>
@@ -328,10 +342,9 @@
   <script>
     var CLAVE_HORARIO = "horarioAkademia";
 
-    var horas = ['16:00', '17:00', '18:00', '19:00', '20:00'];
+    var horas = ['16:00', '17:00', '18:00', '19:00'];
     var dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
     var diasNombres = ['Astelehena', 'Asteartea', 'Asteazkena', 'Osteguna', 'Ostirala'];
-    var clasesDia = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
 
     function cargarHorario() {
       try {
@@ -340,9 +353,11 @@
           return data;
         }
       } catch (e) {}
-      // Inicializar vacío
+      // Inicializar vacío: cada celda tiene 5 líneas
       return Array(horas.length).fill(null).map(function() {
-        return Array(dias.length).fill('');
+        return Array(dias.length).fill(null).map(function() {
+          return ['', '', '', '', ''];
+        });
       });
     }
 
@@ -366,24 +381,36 @@
 
         for (var j = 0; j < dias.length; j++) {
           var td = document.createElement('td');
-          td.className = clasesDia[j];
           
-          var input = document.createElement('input');
-          input.type = 'text';
-          input.value = datos[i][j] || '';
-          input.placeholder = '';
-          input.setAttribute('data-fila', i);
-          input.setAttribute('data-col', j);
+          var celda = document.createElement('div');
+          celda.className = 'celda fila-' + i;
           
-          input.addEventListener('input', function() {
-            var fila = parseInt(this.getAttribute('data-fila'));
-            var col = parseInt(this.getAttribute('data-col'));
-            var datosActuales = cargarHorario();
-            datosActuales[fila][col] = this.value;
-            guardarHorario(datosActuales);
-          });
+          // 5 líneas por celda
+          for (var k = 0; k < 5; k++) {
+            var input = document.createElement('input');
+            input.type = 'text';
+            input.value = (datos[i][j] && datos[i][j][k]) || '';
+            input.placeholder = '';
+            input.setAttribute('data-fila', i);
+            input.setAttribute('data-col', j);
+            input.setAttribute('data-linea', k);
+            
+            input.addEventListener('input', function() {
+              var fila = parseInt(this.getAttribute('data-fila'));
+              var col = parseInt(this.getAttribute('data-col'));
+              var linea = parseInt(this.getAttribute('data-linea'));
+              var datosActuales = cargarHorario();
+              if (!datosActuales[fila][col]) {
+                datosActuales[fila][col] = ['', '', '', '', ''];
+              }
+              datosActuales[fila][col][linea] = this.value;
+              guardarHorario(datosActuales);
+            });
 
-          td.appendChild(input);
+            celda.appendChild(input);
+          }
+
+          td.appendChild(celda);
           tr.appendChild(td);
         }
 
