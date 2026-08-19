@@ -69,6 +69,40 @@
       padding-bottom: 8px;
     }
 
+    .shortcuts {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .shortcut {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      background-color: var(--fondo-tarjeta);
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      gap: 6px;
+    }
+
+    .shortcut:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .shortcut svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
     .tarjeta {
       display: flex;
       align-items: center;
@@ -130,6 +164,16 @@
       font-size: 0.8rem;
       color: var(--texto-suave);
     }
+
+    @media (max-width: 540px) {
+      .shortcuts {
+        flex-direction: column;
+      }
+
+      .shortcut {
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -139,6 +183,26 @@
   </header>
 
   <main>
+    <p class="seccion-titulo">Accesos directos</p>
+
+    <div class="shortcuts">
+      <a class="shortcut" href="https://mail.google.com" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        Gmail
+      </a>
+      <a class="shortcut" href="https://drive.google.com" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+        Drive
+      </a>
+    </div>
+
     <p class="seccion-titulo">Páginas</p>
 
     <div class="tarjeta">
