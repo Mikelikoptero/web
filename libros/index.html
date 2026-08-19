@@ -301,6 +301,61 @@
       display: none;
     }
 
+    .ordenacion {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .ordenacion label {
+      font-size: 0.85rem;
+      color: var(--texto-suave);
+      margin-right: 4px;
+    }
+
+    .ordenacion select {
+      padding: 6px 10px;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      background-color: var(--fondo-tarjeta);
+      color: var(--texto);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+
+    .ordenacion select:focus {
+      border-color: var(--acento);
+    }
+
+    .ordenacion button {
+      padding: 6px 14px;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      background-color: var(--fondo-tarjeta);
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .ordenacion button:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .ordenacion button.activo {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
     .respaldo {
       display: flex;
       gap: 12px;
@@ -383,6 +438,15 @@
         text-align: left;
       }
 
+      .ordenacion {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .ordenacion select {
+        width: 100%;
+      }
+
       .respaldo {
         flex-direction: column;
       }
@@ -420,6 +484,15 @@
     </div>
 
     <div id="vista-leidos" class="oculto">
+      <div class="ordenacion">
+        <label for="orden-campo">Ordenar por:</label>
+        <select id="orden-campo">
+          <option value="fecha">Fecha</option>
+          <option value="titulo">Título</option>
+          <option value="autor">Autor</option>
+        </select>
+        <button id="orden-direction" type="button">Descendente ↓</button>
+      </div>
       <div id="lista-leidos"></div>
     </div>
 
@@ -450,6 +523,10 @@
     var btnExportar = document.getElementById("btn-exportar");
     var btnImportar = document.getElementById("btn-importar");
     var inputArchivo = document.getElementById("input-archivo");
+    var ordenCampo = document.getElementById("orden-campo");
+    var ordenDirection = document.getElementById("orden-direction");
+
+    var direccionAscendente = false;
 
     function cargar(clave) {
       try {
@@ -624,6 +701,35 @@
       }
     }
 
+    function ordenarLibros(libros, campo, ascendente) {
+      var copia = libros.slice();
+      
+      copia.sort(function(a, b) {
+        var valorA, valorB;
+        
+        if (campo === 'fecha') {
+          valorA = a.fecha || '';
+          valorB = b.fecha || '';
+          // Las fechas vacías van al final
+          if (valorA === '' && valorB === '') return 0;
+          if (valorA === '') return 1;
+          if (valorB === '') return -1;
+        } else if (campo === 'titulo') {
+          valorA = (a.titulo || '').toLowerCase();
+          valorB = (b.titulo || '').toLowerCase();
+        } else if (campo === 'autor') {
+          valorA = (a.autor || '').toLowerCase();
+          valorB = (b.autor || '').toLowerCase();
+        }
+        
+        if (valorA < valorB) return ascendente ? -1 : 1;
+        if (valorA > valorB) return ascendente ? 1 : -1;
+        return 0;
+      });
+      
+      return copia;
+    }
+
     function renderParaLeer() {
       var libros = cargar(CLAVE_PARA_LEER);
       listaParaLeer.innerHTML = "";
@@ -661,12 +767,21 @@
 
     function renderLeidos() {
       var libros = cargar(CLAVE_LEIDOS);
+      var campo = ordenCampo.value;
+      var ascendente = direccionAscendente;
+      
+      var librosOrdenados = ordenarLibros(libros, campo, ascendente);
+      
       listaLeidos.innerHTML = "";
-      if (libros.length === 0) {
+      if (librosOrdenados.length === 0) {
         listaLeidos.appendChild(mensajeVacio("Todavía no hay libros leídos."));
         return;
       }
-      libros.forEach(function (libro, indice) {
+      
+      librosOrdenados.forEach(function (libro, indice) {
+        // Encontrar el índice real en el array original para actualizar
+        var indiceReal = libros.indexOf(libro);
+        
         var fila = document.createElement("div");
         fila.className = "libro";
         
@@ -674,7 +789,7 @@
 
         var acciones = document.createElement("div");
         acciones.className = "acciones";
-        acciones.appendChild(crearEstrellas(libro, indice));
+        acciones.appendChild(crearEstrellas(libro, indiceReal));
         
         var fechaDiv = document.createElement("div");
         fechaDiv.className = "fecha";
@@ -685,7 +800,7 @@
         }
         acciones.appendChild(fechaDiv);
         
-        acciones.appendChild(crearFecha(libro, indice));
+        acciones.appendChild(crearFecha(libro, indiceReal));
 
         fila.appendChild(acciones);
         listaLeidos.appendChild(fila);
@@ -733,6 +848,16 @@
       tabParaLeer.classList.remove("activo");
       vistaLeidos.classList.remove("oculto");
       vistaParaLeer.classList.add("oculto");
+      renderLeidos();
+    }
+
+    function toggleDirection() {
+      direccionAscendente = !direccionAscendente;
+      ordenDirection.textContent = direccionAscendente ? "Ascendente ↑" : "Descendente ↓";
+      renderLeidos();
+    }
+
+    function cambiarOrden() {
       renderLeidos();
     }
 
@@ -792,6 +917,8 @@
     });
     tabParaLeer.addEventListener("click", mostrarParaLeer);
     tabLeidos.addEventListener("click", mostrarLeidos);
+    ordenDirection.addEventListener("click", toggleDirection);
+    ordenCampo.addEventListener("change", cambiarOrden);
     btnExportar.addEventListener("click", exportarDatos);
     btnImportar.addEventListener("click", function() {
       inputArchivo.click();
