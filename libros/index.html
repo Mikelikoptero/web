@@ -15,6 +15,8 @@
       --texto-suave: #7a7264;
       --borde: #ddd3c0;
       --acento: #8a7a5c;
+      --estrella: #d4a373;
+      --estrella-vacia: #e8ddd0;
     }
 
     * {
@@ -68,7 +70,6 @@
       padding: 0 24px 64px;
     }
 
-    /* Selector de lista: celda grande con dos botones */
     .selector {
       display: flex;
       background-color: var(--fondo-tarjeta);
@@ -98,7 +99,6 @@
       color: var(--fondo-tarjeta);
     }
 
-    /* Fila de entrada: siempre la primera */
     .fila-entrada {
       display: flex;
       gap: 10px;
@@ -152,7 +152,6 @@
       height: 18px;
     }
 
-    /* Lista de libros */
     .libro {
       display: flex;
       align-items: center;
@@ -168,6 +167,10 @@
     .libro .texto {
       font-size: 0.95rem;
       min-width: 0;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .libro .texto strong {
@@ -176,6 +179,43 @@
 
     .libro .texto .autor {
       color: var(--texto-suave);
+    }
+
+    /* Estrellas */
+    .estrellas {
+      display: flex;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .estrella-btn {
+      background: none;
+      border: none;
+      padding: 2px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      line-height: 1;
+      color: var(--estrella-vacia);
+      transition: color 0.2s ease, transform 0.15s ease;
+    }
+
+    .estrella-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .estrella-btn.activa {
+      color: var(--estrella);
+    }
+
+    .estrella-btn.activa:hover {
+      color: #b8926a;
+    }
+
+    .libro .acciones {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
     }
 
     .lista-vacia {
@@ -209,6 +249,19 @@
 
       .boton-cuadrado {
         width: 100%;
+      }
+
+      .libro {
+        flex-wrap: wrap;
+      }
+
+      .libro .texto {
+        flex: 1 1 100%;
+      }
+
+      .libro .acciones {
+        flex: 1 1 100%;
+        justify-content: flex-end;
       }
     }
   </style>
@@ -308,6 +361,43 @@
       return div;
     }
 
+    function crearEstrellas(libro, indice) {
+      var contenedor = document.createElement("div");
+      contenedor.className = "estrellas";
+
+      // Si el libro no tiene puntuación, inicializarla a 0
+      if (typeof libro.puntuacion === 'undefined') {
+        libro.puntuacion = 0;
+      }
+
+      for (var i = 1; i <= 5; i++) {
+        var btn = document.createElement("button");
+        btn.className = "estrella-btn" + (i <= libro.puntuacion ? " activa" : "");
+        btn.textContent = "★";
+        btn.type = "button";
+        btn.setAttribute("aria-label", "Puntuación " + i + " estrellas");
+        
+        btn.addEventListener("click", function(estrellaIndex) {
+          return function() {
+            actualizarPuntuacion(indice, estrellaIndex);
+          };
+        }(i));
+
+        contenedor.appendChild(btn);
+      }
+
+      return contenedor;
+    }
+
+    function actualizarPuntuacion(indice, puntuacion) {
+      var leidos = cargar(CLAVE_LEIDOS);
+      if (leidos[indice]) {
+        leidos[indice].puntuacion = puntuacion;
+        guardar(CLAVE_LEIDOS, leidos);
+        renderLeidos();
+      }
+    }
+
     function renderParaLeer() {
       var libros = cargar(CLAVE_PARA_LEER);
       listaParaLeer.innerHTML = "";
@@ -320,6 +410,9 @@
         fila.className = "libro";
         fila.appendChild(crearTextoLibro(libro));
 
+        var acciones = document.createElement("div");
+        acciones.className = "acciones";
+
         var tick = document.createElement("button");
         tick.className = "boton-cuadrado";
         tick.type = "button";
@@ -330,7 +423,8 @@
           marcarLeido(indice);
         });
 
-        fila.appendChild(tick);
+        acciones.appendChild(tick);
+        fila.appendChild(acciones);
         listaParaLeer.appendChild(fila);
       });
     }
@@ -342,10 +436,16 @@
         listaLeidos.appendChild(mensajeVacio("Todavía no hay libros leídos."));
         return;
       }
-      libros.forEach(function (libro) {
+      libros.forEach(function (libro, indice) {
         var fila = document.createElement("div");
         fila.className = "libro";
         fila.appendChild(crearTextoLibro(libro));
+
+        var acciones = document.createElement("div");
+        acciones.className = "acciones";
+        acciones.appendChild(crearEstrellas(libro, indice));
+
+        fila.appendChild(acciones);
         listaLeidos.appendChild(fila);
       });
     }
@@ -370,6 +470,8 @@
       var paraLeer = cargar(CLAVE_PARA_LEER);
       var leidos = cargar(CLAVE_LEIDOS);
       var libro = paraLeer.splice(indice, 1)[0];
+      // Inicializar puntuación a 0 al mover a leídos
+      libro.puntuacion = 0;
       leidos.unshift(libro);
       guardar(CLAVE_PARA_LEER, paraLeer);
       guardar(CLAVE_LEIDOS, leidos);
