@@ -261,6 +261,20 @@
         </svg>
         Anna's Archive
       </a>
+      <a class="shortcut" href="https://www.wordreference.com/es/" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        WordReference
+      </a>
+      <a class="shortcut" href="https://hiztegiak.elhuyar.eus/" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        Elhuyar
+      </a>
     </div>
 
     <div class="menus-container">
@@ -296,6 +310,9 @@
           </a>
           <a class="shortcut" href="https://onddiakademia.github.io/TaulaPeriodiko/" target="_blank" rel="noopener noreferrer">
             Taula Periodikoa
+          </a>
+          <a class="shortcut" href="https://sintaxis.org/analizador/" target="_blank" rel="noopener noreferrer">
+            Sintaxis
           </a>
         </div>
       </div>
@@ -337,20 +354,17 @@
     var botonVideo = document.getElementById('boton-video');
 
     function toggleMenu(menu, boton, otroMenu, otroBoton) {
-      // Si el menú que queremos abrir ya está abierto, lo cerramos
       if (menu.classList.contains('abierto')) {
         menu.classList.remove('abierto');
         boton.classList.remove('abierto');
         return;
       }
 
-      // Cerramos el otro menú si está abierto
       if (otroMenu.classList.contains('abierto')) {
         otroMenu.classList.remove('abierto');
         otroBoton.classList.remove('abierto');
       }
 
-      // Abrimos el menú actual
       menu.classList.add('abierto');
       boton.classList.add('abierto');
     }
@@ -363,7 +377,6 @@
       toggleMenu(menuVideo, botonVideo, menuAkademia, botonAkademia);
     });
 
-    // Cerrar menús al hacer clic fuera
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.menu-desplegable')) {
         menuAkademia.classList.remove('abierto');
