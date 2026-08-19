@@ -642,20 +642,7 @@
       return svg;
     }
 
-    function crearTextoLibroParaLeer(libro) {
-      var span = document.createElement("span");
-      span.className = "texto";
-      var strong = document.createElement("strong");
-      strong.textContent = libro.titulo || "Sin título";
-      span.appendChild(strong);
-      var autor = document.createElement("span");
-      autor.className = "autor";
-      autor.textContent = " - " + (libro.autor || "Autor desconocido");
-      span.appendChild(autor);
-      return span;
-    }
-
-    function crearInfoLibroLeido(libro) {
+    function crearInfoLibro(libro) {
       var div = document.createElement("div");
       div.className = "info";
 
@@ -780,7 +767,6 @@
           botonHoy.classList.remove("activo");
         }
         ocultarEditor();
-        // Actualizar el texto mostrado
         var span = contenedor.querySelector('span');
         if (fecha) {
           span.textContent = formatearFecha(fecha);
@@ -827,7 +813,6 @@
         }
       });
 
-      // Cerrar editor al hacer clic fuera
       document.addEventListener("click", function(e) {
         if (!contenedor.contains(e.target)) {
           ocultarEditor();
@@ -894,10 +879,7 @@
         var fila = document.createElement("div");
         fila.className = "libro";
         
-        var info = document.createElement("div");
-        info.className = "info";
-        info.appendChild(crearTextoLibroParaLeer(libro));
-        fila.appendChild(info);
+        fila.appendChild(crearInfoLibro(libro));
 
         var acciones = document.createElement("div");
         acciones.className = "acciones";
@@ -937,7 +919,7 @@
         var fila = document.createElement("div");
         fila.className = "libro";
         
-        fila.appendChild(crearInfoLibroLeido(libro));
+        fila.appendChild(crearInfoLibro(libro));
 
         var acciones = document.createElement("div");
         acciones.className = "acciones";
