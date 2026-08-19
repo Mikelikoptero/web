@@ -186,11 +186,97 @@
       font-size: 0.8rem;
       color: var(--texto-suave);
       text-align: right;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
     }
 
     .libro .fecha span {
       font-weight: 500;
       color: var(--texto);
+    }
+
+    .libro .fecha .boton-editar-fecha {
+      background: none;
+      border: 1px solid var(--borde);
+      border-radius: 4px;
+      padding: 2px 6px;
+      color: var(--texto-suave);
+      cursor: pointer;
+      font-size: 0.7rem;
+      line-height: 1;
+      transition: all 0.2s ease;
+      opacity: 0.5;
+    }
+
+    .libro .fecha .boton-editar-fecha:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+      opacity: 1;
+    }
+
+    .libro .fecha .editor-fecha {
+      display: none;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .libro .fecha .editor-fecha.visible {
+      display: flex;
+    }
+
+    .libro .fecha .editor-fecha input[type="date"] {
+      padding: 2px 6px;
+      border: 1px solid var(--borde);
+      border-radius: 4px;
+      background-color: var(--fondo);
+      color: var(--texto);
+      font-family: inherit;
+      font-size: 0.7rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+      max-width: 120px;
+    }
+
+    .libro .fecha .editor-fecha input[type="date"]:focus {
+      border-color: var(--acento);
+    }
+
+    .libro .fecha .editor-fecha input[type="date"]::-webkit-calendar-picker-indicator {
+      opacity: 0.6;
+      cursor: pointer;
+    }
+
+    .libro .fecha .editor-fecha input[type="date"]:hover::-webkit-calendar-picker-indicator {
+      opacity: 1;
+    }
+
+    .libro .fecha .editor-fecha .boton-fecha-pequeno {
+      padding: 2px 8px;
+      border: 1px solid var(--borde);
+      border-radius: 4px;
+      background-color: var(--fondo);
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .libro .fecha .editor-fecha .boton-fecha-pequeno:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .libro .fecha .editor-fecha .boton-fecha-pequeno.activo {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
     }
 
     .estrellas {
@@ -228,64 +314,6 @@
       align-items: flex-end;
       gap: 6px;
       flex-shrink: 0;
-    }
-
-    .acciones-fecha {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .acciones-fecha input[type="date"] {
-      padding: 4px 8px;
-      border: 1px solid var(--borde);
-      border-radius: 6px;
-      background-color: var(--fondo);
-      color: var(--texto);
-      font-family: inherit;
-      font-size: 0.8rem;
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s ease;
-      max-width: 140px;
-    }
-
-    .acciones-fecha input[type="date"]:focus {
-      border-color: var(--acento);
-    }
-
-    .acciones-fecha input[type="date"]::-webkit-calendar-picker-indicator {
-      opacity: 0.6;
-      cursor: pointer;
-    }
-
-    .acciones-fecha input[type="date"]:hover::-webkit-calendar-picker-indicator {
-      opacity: 1;
-    }
-
-    .boton-fecha {
-      padding: 4px 12px;
-      border: 1px solid var(--borde);
-      border-radius: 6px;
-      background-color: var(--fondo);
-      color: var(--texto-suave);
-      font-family: inherit;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .boton-fecha:hover {
-      background-color: var(--acento);
-      color: var(--fondo-tarjeta);
-      border-color: var(--acento);
-    }
-
-    .boton-fecha.activo {
-      background-color: var(--acento);
-      color: var(--fondo-tarjeta);
-      border-color: var(--acento);
     }
 
     .lista-vacia {
@@ -423,19 +451,18 @@
         border-top: 1px solid var(--borde);
       }
 
-      .acciones-fecha {
-        flex-wrap: wrap;
-        width: 100%;
-      }
-
-      .acciones-fecha input[type="date"] {
-        flex: 1;
-        min-width: 120px;
-        max-width: unset;
-      }
-
       .libro .fecha {
-        text-align: left;
+        justify-content: flex-start;
+      }
+
+      .libro .fecha .editor-fecha {
+        flex-wrap: wrap;
+      }
+
+      .libro .fecha .editor-fecha input[type="date"] {
+        flex: 1;
+        min-width: 100px;
+        max-width: unset;
       }
 
       .ordenacion {
@@ -571,6 +598,50 @@
       return svg;
     }
 
+    function svgCalendar() {
+      var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("fill", "none");
+      svg.setAttribute("stroke", "currentColor");
+      svg.setAttribute("stroke-width", "2");
+      svg.setAttribute("stroke-linecap", "round");
+      svg.setAttribute("stroke-linejoin", "round");
+      svg.style.width = "12px";
+      svg.style.height = "12px";
+      
+      var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute("x", "3");
+      rect.setAttribute("y", "4");
+      rect.setAttribute("width", "18");
+      rect.setAttribute("height", "18");
+      rect.setAttribute("rx", "2");
+      rect.setAttribute("ry", "2");
+      svg.appendChild(rect);
+      
+      var line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line1.setAttribute("x1", "16");
+      line1.setAttribute("y1", "2");
+      line1.setAttribute("x2", "16");
+      line1.setAttribute("y2", "6");
+      svg.appendChild(line1);
+      
+      var line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line2.setAttribute("x1", "8");
+      line2.setAttribute("y1", "2");
+      line2.setAttribute("x2", "8");
+      line2.setAttribute("y2", "6");
+      svg.appendChild(line2);
+      
+      var line3 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line3.setAttribute("x1", "3");
+      line3.setAttribute("y1", "10");
+      line3.setAttribute("x2", "21");
+      line3.setAttribute("y2", "10");
+      svg.appendChild(line3);
+      
+      return svg;
+    }
+
     function crearTextoLibroParaLeer(libro) {
       var span = document.createElement("span");
       span.className = "texto";
@@ -635,21 +706,37 @@
       return contenedor;
     }
 
-    function crearFecha(libro, indice) {
+    function crearFechaLeido(libro, indice) {
       var contenedor = document.createElement("div");
-      contenedor.className = "acciones-fecha";
+      contenedor.className = "fecha";
+
+      var textoFecha = document.createElement("span");
+      if (libro.fecha) {
+        textoFecha.textContent = formatearFecha(libro.fecha);
+      } else {
+        textoFecha.textContent = "Sin fecha";
+        textoFecha.style.color = "var(--texto-suave)";
+      }
+      contenedor.appendChild(textoFecha);
+
+      var botonEditar = document.createElement("button");
+      botonEditar.className = "boton-editar-fecha";
+      botonEditar.type = "button";
+      botonEditar.title = "Editar fecha";
+      botonEditar.setAttribute("aria-label", "Editar fecha");
+      botonEditar.appendChild(svgCalendar());
+      contenedor.appendChild(botonEditar);
+
+      var editor = document.createElement("div");
+      editor.className = "editor-fecha";
 
       var input = document.createElement("input");
       input.type = "date";
       input.value = libro.fecha || '';
       input.setAttribute("aria-label", "Fecha de finalización");
       
-      input.addEventListener("change", function() {
-        actualizarFecha(indice, this.value);
-      });
-
       var botonHoy = document.createElement("button");
-      botonHoy.className = "boton-fecha";
+      botonHoy.className = "boton-fecha-pequeno";
       botonHoy.textContent = "Hoy";
       botonHoy.type = "button";
       
@@ -657,28 +744,95 @@
         botonHoy.classList.add("activo");
       }
       
-      botonHoy.addEventListener("click", function() {
+      var botonGuardar = document.createElement("button");
+      botonGuardar.className = "boton-fecha-pequeno";
+      botonGuardar.textContent = "Guardar";
+      botonGuardar.type = "button";
+
+      var botonCancelar = document.createElement("button");
+      botonCancelar.className = "boton-fecha-pequeno";
+      botonCancelar.textContent = "×";
+      botonCancelar.type = "button";
+      botonCancelar.setAttribute("aria-label", "Cancelar");
+
+      editor.appendChild(input);
+      editor.appendChild(botonHoy);
+      editor.appendChild(botonGuardar);
+      editor.appendChild(botonCancelar);
+
+      contenedor.appendChild(editor);
+
+      function mostrarEditor() {
+        contenedor.querySelector('.editor-fecha').classList.add('visible');
+        input.focus();
+      }
+
+      function ocultarEditor() {
+        contenedor.querySelector('.editor-fecha').classList.remove('visible');
+      }
+
+      function guardarFecha() {
+        var fecha = input.value;
+        actualizarFecha(indice, fecha);
+        if (fecha === obtenerFechaActual()) {
+          botonHoy.classList.add("activo");
+        } else {
+          botonHoy.classList.remove("activo");
+        }
+        ocultarEditor();
+        // Actualizar el texto mostrado
+        var span = contenedor.querySelector('span');
+        if (fecha) {
+          span.textContent = formatearFecha(fecha);
+          span.style.color = "";
+        } else {
+          span.textContent = "Sin fecha";
+          span.style.color = "var(--texto-suave)";
+        }
+      }
+
+      botonEditar.addEventListener("click", function(e) {
+        e.stopPropagation();
+        if (editor.classList.contains('visible')) {
+          ocultarEditor();
+        } else {
+          mostrarEditor();
+        }
+      });
+
+      botonGuardar.addEventListener("click", function(e) {
+        e.stopPropagation();
+        guardarFecha();
+      });
+
+      botonCancelar.addEventListener("click", function(e) {
+        e.stopPropagation();
+        ocultarEditor();
+      });
+
+      botonHoy.addEventListener("click", function(e) {
+        e.stopPropagation();
         var fechaHoy = obtenerFechaActual();
         input.value = fechaHoy;
-        actualizarFecha(indice, fechaHoy);
         this.classList.add("activo");
       });
 
-      var botonBorrar = document.createElement("button");
-      botonBorrar.className = "boton-fecha";
-      botonBorrar.textContent = "×";
-      botonBorrar.type = "button";
-      botonBorrar.setAttribute("aria-label", "Borrar fecha");
-      
-      botonBorrar.addEventListener("click", function() {
-        input.value = '';
-        actualizarFecha(indice, '');
-        botonHoy.classList.remove("activo");
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          guardarFecha();
+        }
+        if (e.key === "Escape") {
+          ocultarEditor();
+        }
       });
 
-      contenedor.appendChild(input);
-      contenedor.appendChild(botonHoy);
-      contenedor.appendChild(botonBorrar);
+      // Cerrar editor al hacer clic fuera
+      document.addEventListener("click", function(e) {
+        if (!contenedor.contains(e.target)) {
+          ocultarEditor();
+        }
+      });
 
       return contenedor;
     }
@@ -710,7 +864,6 @@
         if (campo === 'fecha') {
           valorA = a.fecha || '';
           valorB = b.fecha || '';
-          // Las fechas vacías van al final
           if (valorA === '' && valorB === '') return 0;
           if (valorA === '') return 1;
           if (valorB === '') return -1;
@@ -778,8 +931,7 @@
         return;
       }
       
-      librosOrdenados.forEach(function (libro, indice) {
-        // Encontrar el índice real en el array original para actualizar
+      librosOrdenados.forEach(function (libro) {
         var indiceReal = libros.indexOf(libro);
         
         var fila = document.createElement("div");
@@ -790,17 +942,7 @@
         var acciones = document.createElement("div");
         acciones.className = "acciones";
         acciones.appendChild(crearEstrellas(libro, indiceReal));
-        
-        var fechaDiv = document.createElement("div");
-        fechaDiv.className = "fecha";
-        if (libro.fecha) {
-          fechaDiv.innerHTML = '<span>' + formatearFecha(libro.fecha) + '</span>';
-        } else {
-          fechaDiv.innerHTML = '<span style="color: var(--texto-suave);">Sin fecha</span>';
-        }
-        acciones.appendChild(fechaDiv);
-        
-        acciones.appendChild(crearFecha(libro, indiceReal));
+        acciones.appendChild(crearFechaLeido(libro, indiceReal));
 
         fila.appendChild(acciones);
         listaLeidos.appendChild(fila);
