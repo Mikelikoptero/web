@@ -162,11 +162,18 @@
       border-radius: 10px;
       padding: 16px 20px;
       margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .libro .info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 150px;
     }
 
     .libro .texto {
       font-size: 0.95rem;
-      min-width: 0;
       display: flex;
       align-items: baseline;
       gap: 8px;
@@ -179,6 +186,17 @@
 
     .libro .texto .autor {
       color: var(--texto-suave);
+    }
+
+    .libro .fecha {
+      font-size: 0.8rem;
+      color: var(--texto-suave);
+      margin-top: 4px;
+    }
+
+    .libro .fecha span {
+      font-weight: 500;
+      color: var(--texto);
     }
 
     .estrellas {
@@ -215,6 +233,65 @@
       gap: 8px;
       align-items: center;
       flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .acciones-fecha {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .acciones-fecha input[type="date"] {
+      padding: 4px 8px;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      background-color: var(--fondo);
+      color: var(--texto);
+      font-family: inherit;
+      font-size: 0.8rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+      max-width: 140px;
+    }
+
+    .acciones-fecha input[type="date"]:focus {
+      border-color: var(--acento);
+    }
+
+    .acciones-fecha input[type="date"]::-webkit-calendar-picker-indicator {
+      opacity: 0.6;
+      cursor: pointer;
+    }
+
+    .acciones-fecha input[type="date"]:hover::-webkit-calendar-picker-indicator {
+      opacity: 1;
+    }
+
+    .boton-fecha {
+      padding: 4px 12px;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      background-color: var(--fondo);
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .boton-fecha:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .boton-fecha.activo {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
     }
 
     .lista-vacia {
@@ -230,7 +307,6 @@
       display: none;
     }
 
-    /* Botones de respaldo */
     .respaldo {
       display: flex;
       gap: 12px;
@@ -284,16 +360,29 @@
       }
 
       .libro {
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
       }
 
-      .libro .texto {
-        flex: 1 1 100%;
+      .libro .info {
+        min-width: unset;
       }
 
       .libro .acciones {
-        flex: 1 1 100%;
-        justify-content: flex-end;
+        justify-content: flex-start;
+        padding-top: 4px;
+        border-top: 1px solid var(--borde);
+      }
+
+      .acciones-fecha {
+        flex-wrap: wrap;
+        width: 100%;
+      }
+
+      .acciones-fecha input[type="date"] {
+        flex: 1;
+        min-width: 120px;
+        max-width: unset;
       }
 
       .respaldo {
@@ -321,7 +410,7 @@
     <div id="vista-para-leer">
       <div class="fila-entrada">
         <input id="input-titulo" type="text" placeholder="Título" autocomplete="off">
-        <input id="input-autor" type="text" placeholder="Autor/a" autocomplete="off">
+        <input id="input-autor" type="text" placeholder="Autor" autocomplete="off">
         <button class="boton-cuadrado" id="boton-anadir" type="button" title="Añadir libro" aria-label="Añadir libro">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -336,10 +425,9 @@
       <div id="lista-leidos"></div>
     </div>
 
-    <!-- Botones de respaldo -->
     <div class="respaldo">
-      <button id="btn-exportar" type="button">📥 Exportar datos (JSON)</button>
-      <button id="btn-importar" type="button">📤 Importar datos (JSON)</button>
+      <button id="btn-exportar" type="button">Exportar datos</button>
+      <button id="btn-importar" type="button">Importar datos</button>
       <input type="file" id="input-archivo" accept=".json">
     </div>
   </main>
@@ -375,6 +463,23 @@
 
     function guardar(clave, datos) {
       localStorage.setItem(clave, JSON.stringify(datos));
+    }
+
+    function obtenerFechaActual() {
+      var hoy = new Date();
+      var dd = String(hoy.getDate()).padStart(2, '0');
+      var mm = String(hoy.getMonth() + 1).padStart(2, '0');
+      var yyyy = hoy.getFullYear();
+      return yyyy + '-' + mm + '-' + dd;
+    }
+
+    function formatearFecha(fecha) {
+      if (!fecha) return '';
+      var partes = fecha.split('-');
+      if (partes.length === 3) {
+        return partes[2] + '/' + partes[1] + '/' + partes[0];
+      }
+      return fecha;
     }
 
     function svgTick() {
@@ -438,10 +543,67 @@
       return contenedor;
     }
 
+    function crearFecha(libro, indice) {
+      var contenedor = document.createElement("div");
+      contenedor.className = "acciones-fecha";
+
+      var input = document.createElement("input");
+      input.type = "date";
+      input.value = libro.fecha || '';
+      input.setAttribute("aria-label", "Fecha de finalización");
+      
+      input.addEventListener("change", function() {
+        actualizarFecha(indice, this.value);
+      });
+
+      var botonHoy = document.createElement("button");
+      botonHoy.className = "boton-fecha";
+      botonHoy.textContent = "Hoy";
+      botonHoy.type = "button";
+      
+      if (libro.fecha === obtenerFechaActual()) {
+        botonHoy.classList.add("activo");
+      }
+      
+      botonHoy.addEventListener("click", function() {
+        var fechaHoy = obtenerFechaActual();
+        input.value = fechaHoy;
+        actualizarFecha(indice, fechaHoy);
+        this.classList.add("activo");
+      });
+
+      var botonBorrar = document.createElement("button");
+      botonBorrar.className = "boton-fecha";
+      botonBorrar.textContent = "×";
+      botonBorrar.type = "button";
+      botonBorrar.setAttribute("aria-label", "Borrar fecha");
+      
+      botonBorrar.addEventListener("click", function() {
+        input.value = '';
+        actualizarFecha(indice, '');
+        botonHoy.classList.remove("activo");
+      });
+
+      contenedor.appendChild(input);
+      contenedor.appendChild(botonHoy);
+      contenedor.appendChild(botonBorrar);
+
+      return contenedor;
+    }
+
     function actualizarPuntuacion(indice, puntuacion) {
       var leidos = cargar(CLAVE_LEIDOS);
       if (leidos[indice]) {
         leidos[indice].puntuacion = puntuacion;
+        guardar(CLAVE_LEIDOS, leidos);
+        renderLeidos();
+      }
+    }
+
+    function actualizarFecha(indice, fecha) {
+      var leidos = cargar(CLAVE_LEIDOS);
+      if (leidos[indice]) {
+        leidos[indice].fecha = fecha;
         guardar(CLAVE_LEIDOS, leidos);
         renderLeidos();
       }
@@ -457,7 +619,11 @@
       libros.forEach(function (libro, indice) {
         var fila = document.createElement("div");
         fila.className = "libro";
-        fila.appendChild(crearTextoLibro(libro));
+        
+        var info = document.createElement("div");
+        info.className = "info";
+        info.appendChild(crearTextoLibro(libro));
+        fila.appendChild(info);
 
         var acciones = document.createElement("div");
         acciones.className = "acciones";
@@ -488,11 +654,24 @@
       libros.forEach(function (libro, indice) {
         var fila = document.createElement("div");
         fila.className = "libro";
-        fila.appendChild(crearTextoLibro(libro));
+        
+        var info = document.createElement("div");
+        info.className = "info";
+        info.appendChild(crearTextoLibro(libro));
+        
+        if (libro.fecha) {
+          var fechaSpan = document.createElement("div");
+          fechaSpan.className = "fecha";
+          fechaSpan.innerHTML = '<span>' + formatearFecha(libro.fecha) + '</span>';
+          info.appendChild(fechaSpan);
+        }
+        
+        fila.appendChild(info);
 
         var acciones = document.createElement("div");
         acciones.className = "acciones";
         acciones.appendChild(crearEstrellas(libro, indice));
+        acciones.appendChild(crearFecha(libro, indice));
 
         fila.appendChild(acciones);
         listaLeidos.appendChild(fila);
@@ -520,6 +699,7 @@
       var leidos = cargar(CLAVE_LEIDOS);
       var libro = paraLeer.splice(indice, 1)[0];
       libro.puntuacion = 0;
+      libro.fecha = obtenerFechaActual();
       leidos.unshift(libro);
       guardar(CLAVE_PARA_LEER, paraLeer);
       guardar(CLAVE_LEIDOS, leidos);
@@ -542,8 +722,6 @@
       renderLeidos();
     }
 
-    // ===== FUNCIONES DE RESPALDO =====
-    
     function exportarDatos() {
       var datos = {
         paraLeer: cargar(CLAVE_PARA_LEER),
@@ -571,7 +749,6 @@
         try {
           var datos = JSON.parse(e.target.result);
           
-          // Validar que el archivo tenga el formato correcto
           if (typeof datos.paraLeer !== 'undefined' && typeof datos.leidos !== 'undefined') {
             if (confirm("¿Importar datos? Se sobrescribirán los datos actuales.")) {
               guardar(CLAVE_PARA_LEER, datos.paraLeer);
@@ -589,11 +766,9 @@
       };
       lector.readAsText(archivo);
       
-      // Resetear el input para permitir importar el mismo archivo de nuevo
       inputArchivo.value = "";
     }
 
-    // Event listeners
     botonAnadir.addEventListener("click", anadirLibro);
     inputAutor.addEventListener("keydown", function (e) {
       if (e.key === "Enter") anadirLibro();
