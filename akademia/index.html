@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="eu">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -190,7 +190,6 @@
     .horario td .celda.fila-1 { background-color: #fde8f0; }
     .horario td .celda.fila-2 { background-color: #f0e8fd; }
     .horario td .celda.fila-3 { background-color: #e8f0fd; }
-    .horario td .celda.fila-4 { background-color: #e8fde8; }
 
     /* Botones de respaldo */
     .respaldo {
@@ -262,11 +261,11 @@
 <body>
   <header>
     <h1>Akademia</h1>
-    <a class="volver" href="../">Volver al inicio</a>
+    <a class="volver" href="../">Hasierara itzuli</a>
   </header>
 
   <main>
-    <p class="seccion-titulo">Recursos</p>
+    <p class="seccion-titulo">Baliabideak</p>
 
     <div class="shortcuts">
       <a class="shortcut" href="https://www.desmos.com/calculator?lang=es" target="_blank" rel="noopener noreferrer">
@@ -303,11 +302,11 @@
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
         </svg>
-        Sintaxis
+        Sintaxia
       </a>
     </div>
 
-    <p class="seccion-titulo">Horario</p>
+    <p class="seccion-titulo">Ordutegia</p>
 
     <div class="horario-container">
       <table class="horario" id="tabla-horario">
@@ -322,21 +321,21 @@
           </tr>
         </thead>
         <tbody id="cuerpo-horario">
-          <!-- Se genera con JavaScript -->
+          <!-- JavaScript-rekin sortzen da -->
         </tbody>
       </table>
     </div>
 
     <div class="respaldo">
-      <button id="btn-exportar-horario" type="button">Exportar horario</button>
-      <button id="btn-importar-horario" type="button">Importar horario</button>
+      <button id="btn-exportar-horario" type="button">Ordutegia esportatu</button>
+      <button id="btn-importar-horario" type="button">Ordutegia inportatu</button>
       <input type="file" id="input-archivo-horario" accept=".json">
     </div>
 
   </main>
 
   <footer>
-    <p>Web personal</p>
+    <p>Web pertsonala</p>
   </footer>
 
   <script>
@@ -353,7 +352,7 @@
           return data;
         }
       } catch (e) {}
-      // Inicializar vacío: cada celda tiene 5 líneas
+      // Gelaxka hutsik: 5 lerro
       return Array(horas.length).fill(null).map(function() {
         return Array(dias.length).fill(null).map(function() {
           return ['', '', '', '', ''];
@@ -373,7 +372,7 @@
       for (var i = 0; i < horas.length; i++) {
         var tr = document.createElement('tr');
         
-        // Celda de hora
+        // Orduaren gelaxka
         var tdHora = document.createElement('td');
         tdHora.className = 'hora';
         tdHora.textContent = horas[i];
@@ -385,7 +384,7 @@
           var celda = document.createElement('div');
           celda.className = 'celda fila-' + i;
           
-          // 5 líneas por celda
+          // 5 lerro gelaxka bakoitzeko
           for (var k = 0; k < 5; k++) {
             var input = document.createElement('input');
             input.type = 'text';
@@ -424,7 +423,7 @@
       var url = URL.createObjectURL(blob);
       var a = document.createElement("a");
       a.href = url;
-      a.download = "horario_akademia_" + new Date().toISOString().slice(0,10) + ".json";
+      a.download = "ordutegia_akademia_" + new Date().toISOString().slice(0,10) + ".json";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -440,16 +439,16 @@
         try {
           var datos = JSON.parse(e.target.result);
           if (Array.isArray(datos) && datos.length === horas.length) {
-            if (confirm("¿Importar horario? Se sobrescribirán los datos actuales.")) {
+            if (confirm("Ordutegia inportatu? Uneko datuak gainidatziko dira.")) {
               guardarHorario(datos);
               renderHorario();
-              alert("Horario importado correctamente.");
+              alert("Ordutegia behar bezala inportatu da.");
             }
           } else {
-            alert("El archivo no tiene el formato correcto.");
+            alert("Fitxategiak ez du formatu zuzena.");
           }
         } catch (error) {
-          alert("Error al leer el archivo: " + error.message);
+          alert("Errorea fitxategia irakurtzean: " + error.message);
         }
       };
       lector.readAsText(archivo);
