@@ -34,29 +34,10 @@
       align-items: center;
     }
 
-    header {
-      width: 100%;
-      max-width: 720px;
-      padding: 64px 24px 32px;
-    }
-
-    h1 {
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: 2.6rem;
-      font-weight: 600;
-      letter-spacing: 1px;
-    }
-
-    .subtitulo {
-      margin-top: 8px;
-      color: var(--texto-suave);
-      font-size: 1rem;
-    }
-
     main {
       width: 100%;
       max-width: 720px;
-      padding: 0 24px 64px;
+      padding: 40px 24px 64px;
     }
 
     .seccion-titulo {
@@ -127,12 +108,6 @@
       letter-spacing: 0.3px;
     }
 
-    .tarjeta p {
-      font-size: 0.9rem;
-      color: var(--texto-suave);
-      margin-top: 4px;
-    }
-
     .boton {
       display: inline-block;
       padding: 10px 20px;
@@ -142,18 +117,13 @@
       color: var(--acento);
       font-size: 0.9rem;
       font-family: inherit;
-      cursor: not-allowed;
-      opacity: 0.6;
+      cursor: pointer;
       text-decoration: none;
       white-space: nowrap;
+      transition: all 0.2s ease;
     }
 
-    .boton.activo {
-      cursor: pointer;
-      opacity: 1;
-    }
-
-    .boton.activo:hover {
+    .boton:hover {
       background-color: var(--acento);
       color: var(--fondo-tarjeta);
     }
@@ -177,11 +147,6 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>Mi espacio</h1>
-    <p class="subtitulo">Página principal. Desde aquí accedo a mis páginas.</p>
-  </header>
-
   <main>
     <p class="seccion-titulo">Accesos directos</p>
 
@@ -206,11 +171,8 @@
     <p class="seccion-titulo">Páginas</p>
 
     <div class="tarjeta">
-      <div>
-        <h2>Lista de libros</h2>
-        <p>Libros que quiero leer y libros leídos.</p>
-      </div>
-      <a class="boton activo" href="./libros/">Abrir</a>
+      <h2>Lista de libros</h2>
+      <a class="boton" href="./libros/">Abrir</a>
     </div>
   </main>
 
