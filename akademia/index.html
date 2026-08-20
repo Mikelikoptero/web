@@ -15,6 +15,11 @@
       --texto-suave: #7a7264;
       --borde: #ddd3c0;
       --acento: #8a7a5c;
+      --matematika: #fde8e8;
+      --fisika: #fde8f0;
+      --gazte: #f0e8fd;
+      --euskara: #e8f0fd;
+      --ingelesa: #e8fde8;
     }
 
     * {
@@ -111,6 +116,67 @@
       height: 16px;
       flex-shrink: 0;
     }
+
+    /* Asignaturas */
+    .asignaturas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .asignatura {
+      background-color: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 16px 20px;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .asignatura:hover {
+      box-shadow: 0 2px 8px rgba(58, 53, 45, 0.06);
+    }
+
+    .asignatura .nombre {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .asignatura .enlaces {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .asignatura .enlaces a {
+      color: var(--texto-suave);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .asignatura .enlaces a:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+    }
+
+    .asignatura .enlaces .vacio {
+      color: var(--texto-suave);
+      font-size: 0.8rem;
+      opacity: 0.5;
+      font-style: italic;
+    }
+
+    .asignatura.matematika .nombre { background-color: var(--matematika); padding: 4px 8px; border-radius: 4px; }
+    .asignatura.fisika .nombre { background-color: var(--fisika); padding: 4px 8px; border-radius: 4px; }
+    .asignatura.gazte .nombre { background-color: var(--gazte); padding: 4px 8px; border-radius: 4px; }
+    .asignatura.euskara .nombre { background-color: var(--euskara); padding: 4px 8px; border-radius: 4px; }
+    .asignatura.ingelesa .nombre { background-color: var(--ingelesa); padding: 4px 8px; border-radius: 4px; }
 
     /* Botón para mostrar/ocultar horario */
     .boton-horario {
@@ -297,6 +363,10 @@
         font-size: 0.6rem;
         padding: 4px 2px;
       }
+
+      .asignaturas-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -346,6 +416,45 @@
         </svg>
         Sintaxis
       </a>
+    </div>
+
+    <p class="seccion-titulo">Gaiak</p>
+
+    <div class="asignaturas-grid">
+      <div class="asignatura matematika">
+        <div class="nombre">Matematika</div>
+        <div class="enlaces">
+          <span class="vacio">Oraindik ez dago estekarik</span>
+        </div>
+      </div>
+
+      <div class="asignatura fisika">
+        <div class="nombre">Fisika / Kimika</div>
+        <div class="enlaces">
+          <span class="vacio">Oraindik ez dago estekarik</span>
+        </div>
+      </div>
+
+      <div class="asignatura gazte">
+        <div class="nombre">Gazte</div>
+        <div class="enlaces">
+          <span class="vacio">Oraindik ez dago estekarik</span>
+        </div>
+      </div>
+
+      <div class="asignatura euskara">
+        <div class="nombre">Euskara</div>
+        <div class="enlaces">
+          <span class="vacio">Oraindik ez dago estekarik</span>
+        </div>
+      </div>
+
+      <div class="asignatura ingelesa">
+        <div class="nombre">Ingelesa</div>
+        <div class="enlaces">
+          <span class="vacio">Oraindik ez dago estekarik</span>
+        </div>
+      </div>
     </div>
 
     <p class="seccion-titulo">Ordutegia</p>
@@ -398,7 +507,6 @@
     var botonHorario = document.getElementById('boton-horario');
     var horarioWrapper = document.getElementById('horario-wrapper');
 
-    // Estado del horario (abierto/cerrado)
     var horarioAbierto = false;
 
     botonHorario.addEventListener('click', function() {
