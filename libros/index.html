@@ -154,14 +154,24 @@
 
     .libro {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
+      flex-direction: column;
       background-color: var(--fondo-tarjeta);
       border: 1px solid var(--borde);
       border-radius: 10px;
       padding: 16px 20px;
       margin-bottom: 12px;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .libro:hover {
+      box-shadow: 0 2px 8px rgba(58, 53, 45, 0.06);
+    }
+
+    .libro .fila-principal {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
       flex-wrap: wrap;
     }
 
@@ -316,6 +326,84 @@
       flex-shrink: 0;
     }
 
+    .libro .acciones .fila-acciones {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Botón de anotaciones */
+    .boton-nota {
+      background: none;
+      border: 1px solid var(--borde);
+      border-radius: 4px;
+      padding: 4px 8px;
+      color: var(--texto-suave);
+      cursor: pointer;
+      font-size: 0.7rem;
+      line-height: 1;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .boton-nota:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .boton-nota.abierto {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .boton-nota svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Área de anotaciones */
+    .nota-area {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--borde);
+      width: 100%;
+    }
+
+    .nota-area.visible {
+      display: block;
+    }
+
+    .nota-area textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px 12px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      background-color: var(--fondo);
+      color: var(--texto);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      line-height: 1.5;
+    }
+
+    .nota-area textarea:focus {
+      border-color: var(--acento);
+    }
+
+    .nota-area textarea::placeholder {
+      color: var(--texto-suave);
+      opacity: 0.5;
+    }
+
     .lista-vacia {
       color: var(--texto-suave);
       font-size: 0.9rem;
@@ -436,7 +524,7 @@
         width: 100%;
       }
 
-      .libro {
+      .libro .fila-principal {
         flex-direction: column;
         align-items: stretch;
       }
@@ -449,6 +537,11 @@
         align-items: stretch;
         padding-top: 4px;
         border-top: 1px solid var(--borde);
+      }
+
+      .libro .acciones .fila-acciones {
+        justify-content: flex-start;
+        flex-wrap: wrap;
       }
 
       .libro .fecha {
@@ -642,6 +735,26 @@
       return svg;
     }
 
+    function svgNote() {
+      var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("fill", "none");
+      svg.setAttribute("stroke", "currentColor");
+      svg.setAttribute("stroke-width", "2");
+      svg.setAttribute("stroke-linecap", "round");
+      svg.setAttribute("stroke-linejoin", "round");
+      
+      var path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path1.setAttribute("d", "M12 20h9");
+      svg.appendChild(path1);
+      
+      var path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path2.setAttribute("d", "M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z");
+      svg.appendChild(path2);
+      
+      return svg;
+    }
+
     function crearInfoLibro(libro) {
       var div = document.createElement("div");
       div.className = "info";
@@ -822,6 +935,65 @@
       return contenedor;
     }
 
+    function crearNota(libro, indice) {
+      var contenedor = document.createElement("div");
+      contenedor.className = "nota-area";
+      
+      var textarea = document.createElement("textarea");
+      textarea.value = libro.nota || '';
+      textarea.placeholder = "Escribe aquí tus anotaciones...";
+      textarea.setAttribute("data-indice", indice);
+      
+      textarea.addEventListener("input", function() {
+        var idx = parseInt(this.getAttribute("data-indice"));
+        var leidos = cargar(CLAVE_LEIDOS);
+        if (leidos[idx]) {
+          leidos[idx].nota = this.value;
+          guardar(CLAVE_LEIDOS, leidos);
+        }
+      });
+
+      contenedor.appendChild(textarea);
+      return contenedor;
+    }
+
+    function crearBotonNota(indice) {
+      var boton = document.createElement("button");
+      boton.className = "boton-nota";
+      boton.type = "button";
+      boton.setAttribute("data-indice", indice);
+      boton.appendChild(svgNote());
+      boton.appendChild(document.createTextNode(" Nota"));
+      
+      boton.addEventListener("click", function(e) {
+        e.stopPropagation();
+        var idx = parseInt(this.getAttribute("data-indice"));
+        var libroElement = this.closest('.libro');
+        var notaArea = libroElement.querySelector('.nota-area');
+        var estaAbierto = notaArea.classList.contains('visible');
+        
+        // Cerrar todas las notas abiertas
+        document.querySelectorAll('.nota-area.visible').forEach(function(el) {
+          el.classList.remove('visible');
+        });
+        document.querySelectorAll('.boton-nota.abierto').forEach(function(el) {
+          el.classList.remove('abierto');
+        });
+        
+        if (!estaAbierto) {
+          notaArea.classList.add('visible');
+          this.classList.add('abierto');
+          // Enfocar el textarea
+          var textarea = notaArea.querySelector('textarea');
+          if (textarea) {
+            setTimeout(function() { textarea.focus(); }, 50);
+          }
+        }
+      });
+      
+      return boton;
+    }
+
     function actualizarPuntuacion(indice, puntuacion) {
       var leidos = cargar(CLAVE_LEIDOS);
       if (leidos[indice]) {
@@ -879,7 +1051,10 @@
         var fila = document.createElement("div");
         fila.className = "libro";
         
-        fila.appendChild(crearInfoLibro(libro));
+        var filaPrincipal = document.createElement("div");
+        filaPrincipal.className = "fila-principal";
+        
+        filaPrincipal.appendChild(crearInfoLibro(libro));
 
         var acciones = document.createElement("div");
         acciones.className = "acciones";
@@ -895,7 +1070,8 @@
         });
 
         acciones.appendChild(tick);
-        fila.appendChild(acciones);
+        filaPrincipal.appendChild(acciones);
+        fila.appendChild(filaPrincipal);
         listaParaLeer.appendChild(fila);
       });
     }
@@ -919,14 +1095,27 @@
         var fila = document.createElement("div");
         fila.className = "libro";
         
-        fila.appendChild(crearInfoLibro(libro));
+        var filaPrincipal = document.createElement("div");
+        filaPrincipal.className = "fila-principal";
+        
+        filaPrincipal.appendChild(crearInfoLibro(libro));
 
         var acciones = document.createElement("div");
         acciones.className = "acciones";
-        acciones.appendChild(crearEstrellas(libro, indiceReal));
-        acciones.appendChild(crearFechaLeido(libro, indiceReal));
-
-        fila.appendChild(acciones);
+        
+        var filaAcciones = document.createElement("div");
+        filaAcciones.className = "fila-acciones";
+        filaAcciones.appendChild(crearEstrellas(libro, indiceReal));
+        filaAcciones.appendChild(crearFechaLeido(libro, indiceReal));
+        filaAcciones.appendChild(crearBotonNota(indiceReal));
+        
+        acciones.appendChild(filaAcciones);
+        filaPrincipal.appendChild(acciones);
+        fila.appendChild(filaPrincipal);
+        
+        // Área de nota
+        fila.appendChild(crearNota(libro, indiceReal));
+        
         listaLeidos.appendChild(fila);
       });
     }
@@ -953,6 +1142,7 @@
       var libro = paraLeer.splice(indice, 1)[0];
       libro.puntuacion = 0;
       libro.fecha = obtenerFechaActual();
+      libro.nota = '';
       leidos.unshift(libro);
       guardar(CLAVE_PARA_LEER, paraLeer);
       guardar(CLAVE_LEIDOS, leidos);
