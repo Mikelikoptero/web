@@ -50,6 +50,97 @@
       padding-bottom: 8px;
     }
 
+    /* Widget del tiempo */
+    .tiempo-widget {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background-color: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .tiempo-widget .icono-tiempo {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .tiempo-widget .info-tiempo {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tiempo-widget .temperatura {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .tiempo-widget .descripcion {
+      color: var(--texto-suave);
+      font-size: 0.9rem;
+    }
+
+    .tiempo-widget .ciudad {
+      color: var(--texto-suave);
+      font-size: 0.8rem;
+      margin-left: auto;
+    }
+
+    .tiempo-widget .cargando {
+      color: var(--texto-suave);
+      font-size: 0.9rem;
+    }
+
+    /* Notas rápidas */
+    .notas-widget {
+      background-color: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+    }
+
+    .notas-widget textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px 12px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      background-color: var(--fondo);
+      color: var(--texto);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      line-height: 1.5;
+    }
+
+    .notas-widget textarea:focus {
+      border-color: var(--acento);
+    }
+
+    .notas-widget textarea::placeholder {
+      color: var(--texto-suave);
+      opacity: 0.5;
+    }
+
+    .notas-widget .info-notas {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .notas-widget .info-notas span {
+      font-size: 0.75rem;
+      color: var(--texto-suave);
+    }
+
+    /* Accesos directos */
     .shortcuts {
       display: flex;
       gap: 10px;
@@ -221,11 +312,41 @@
       .menu-desplegable .contenido-menu {
         flex-wrap: wrap;
       }
+
+      .tiempo-widget {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .tiempo-widget .ciudad {
+        margin-left: 0;
+      }
     }
   </style>
 </head>
 <body>
   <main>
+    <p class="seccion-titulo">Widgets</p>
+
+    <!-- Widget del tiempo -->
+    <div class="tiempo-widget" id="tiempo-widget">
+      <div class="icono-tiempo" id="icono-tiempo">⏳</div>
+      <div class="info-tiempo">
+        <div class="temperatura" id="temperatura">--°C</div>
+        <div class="descripcion" id="descripcion">Cargando...</div>
+      </div>
+      <div class="ciudad" id="ciudad">--</div>
+    </div>
+
+    <!-- Notas rápidas -->
+    <div class="notas-widget">
+      <div class="info-notas">
+        <span>Notas rápidas</span>
+        <span id="contador-notas">0 caracteres</span>
+      </div>
+      <textarea id="notas-textarea" placeholder="Escribe aquí tus notas rápidas..."></textarea>
+    </div>
+
     <p class="seccion-titulo">Accesos directos</p>
 
     <div class="shortcuts fila">
@@ -286,7 +407,6 @@
         </svg>
         Elhuyar
       </a>
-      <!-- Espacio vacío para mantener el ancho uniforme -->
       <span class="shortcut" style="visibility:hidden;pointer-events:none;"></span>
     </div>
 
@@ -318,6 +438,11 @@
       <h2>Akademia</h2>
       <a class="boton" href="./akademia/">Abrir</a>
     </div>
+
+    <div class="tarjeta">
+      <h2>Rutinas</h2>
+      <a class="boton" href="./rutinas/">Abrir</a>
+    </div>
   </main>
 
   <footer>
@@ -325,6 +450,114 @@
   </footer>
 
   <script>
+    // ===== NOTAS RÁPIDAS =====
+    var CLAVE_NOTAS = "notasRapidas";
+    var textareaNotas = document.getElementById('notas-textarea');
+    var contadorNotas = document.getElementById('contador-notas');
+
+    function cargarNotas() {
+      try {
+        var notas = localStorage.getItem(CLAVE_NOTAS);
+        if (notas !== null) {
+          textareaNotas.value = notas;
+          actualizarContador();
+        }
+      } catch (e) {}
+    }
+
+    function guardarNotas() {
+      localStorage.setItem(CLAVE_NOTAS, textareaNotas.value);
+      actualizarContador();
+    }
+
+    function actualizarContador() {
+      var caracteres = textareaNotas.value.length;
+      contadorNotas.textContent = caracteres + ' caracteres';
+    }
+
+    textareaNotas.addEventListener('input', guardarNotas);
+    cargarNotas();
+
+    // ===== WIDGET DEL TIEMPO =====
+    var CLAVE_TIEMPO = "tiempoCache";
+
+    function obtenerTiempo() {
+      var ciudad = 'Bilbao'; // Puedes cambiarlo por tu ciudad
+      var url = 'https://wttr.in/' + ciudad + '?format=%C|%t|%l&lang=es';
+      
+      // Intentar cargar desde caché
+      var cache = localStorage.getItem(CLAVE_TIEMPO);
+      if (cache) {
+        try {
+          var datosCache = JSON.parse(cache);
+          var ahora = new Date().getTime();
+          // Si la caché tiene menos de 30 minutos, usarla
+          if (ahora - datosCache.timestamp < 30 * 60 * 1000) {
+            actualizarWidget(datosCache.datos);
+            return;
+          }
+        } catch (e) {}
+      }
+
+      // Si no hay caché o ha expirado, hacer la petición
+      fetch(url)
+        .then(function(response) {
+          if (!response.ok) throw new Error('Error al obtener el tiempo');
+          return response.text();
+        })
+        .then(function(data) {
+          var partes = data.split('|');
+          var descripcion = partes[0].trim();
+          var temperatura = partes[1].trim();
+          var localidad = partes[2].trim();
+          
+          var datos = {
+            descripcion: descripcion,
+            temperatura: temperatura,
+            ciudad: localidad
+          };
+          
+          // Guardar en caché
+          localStorage.setItem(CLAVE_TIEMPO, JSON.stringify({
+            timestamp: new Date().getTime(),
+            datos: datos
+          }));
+          
+          actualizarWidget(datos);
+        })
+        .catch(function(error) {
+          console.error('Error al obtener el tiempo:', error);
+          document.getElementById('icono-tiempo').textContent = '❓';
+          document.getElementById('descripcion').textContent = 'No disponible';
+        });
+    }
+
+    function actualizarWidget(datos) {
+      document.getElementById('icono-tiempo').textContent = obtenerIcono(datos.descripcion);
+      document.getElementById('temperatura').textContent = datos.temperatura || '--°C';
+      document.getElementById('descripcion').textContent = datos.descripcion || '--';
+      document.getElementById('ciudad').textContent = datos.ciudad || '--';
+    }
+
+    function obtenerIcono(descripcion) {
+      var desc = descripcion.toLowerCase();
+      if (desc.includes('soleado') || desc.includes('despejado') || desc.includes('sunny')) return '☀️';
+      if (desc.includes('parcialmente nublado') || desc.includes('nubes dispersas')) return '⛅';
+      if (desc.includes('nublado') || desc.includes('cloudy') || desc.includes('overcast')) return '☁️';
+      if (desc.includes('lluvia') || desc.includes('rain') || desc.includes('chubascos')) return '🌧️';
+      if (desc.includes('tormenta') || desc.includes('thunder') || desc.includes('storm')) return '⛈️';
+      if (desc.includes('nieve') || desc.includes('snow')) return '❄️';
+      if (desc.includes('niebla') || desc.includes('fog') || desc.includes('mist')) return '🌫️';
+      if (desc.includes('viento') || desc.includes('windy')) return '💨';
+      return '🌤️';
+    }
+
+    // Cargar el tiempo al inicio
+    obtenerTiempo();
+    // Actualizar cada 30 minutos
+    setInterval(obtenerTiempo, 30 * 60 * 1000);
+
+    // ===== MENÚ VIDEO =====
     document.getElementById('boton-video').addEventListener('click', function() {
       var menu = document.getElementById('menu-video');
       var boton = this;
