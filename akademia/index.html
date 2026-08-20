@@ -15,11 +15,6 @@
       --texto-suave: #7a7264;
       --borde: #ddd3c0;
       --acento: #8a7a5c;
-      --matematika: #fde8e8;
-      --fisika: #fde8f0;
-      --gazte: #f0e8fd;
-      --euskara: #e8f0fd;
-      --ingelesa: #e8fde8;
     }
 
     * {
@@ -138,7 +133,6 @@
     }
 
     .asignatura .nombre {
-      font-weight: 600;
       font-size: 0.95rem;
       margin-bottom: 8px;
       padding-bottom: 6px;
@@ -171,12 +165,6 @@
       opacity: 0.5;
       font-style: italic;
     }
-
-    .asignatura.matematika .nombre { background-color: var(--matematika); padding: 4px 8px; border-radius: 4px; }
-    .asignatura.fisika .nombre { background-color: var(--fisika); padding: 4px 8px; border-radius: 4px; }
-    .asignatura.gazte .nombre { background-color: var(--gazte); padding: 4px 8px; border-radius: 4px; }
-    .asignatura.euskara .nombre { background-color: var(--euskara); padding: 4px 8px; border-radius: 4px; }
-    .asignatura.ingelesa .nombre { background-color: var(--ingelesa); padding: 4px 8px; border-radius: 4px; }
 
     /* Botón para mostrar/ocultar horario */
     .boton-horario {
@@ -380,14 +368,6 @@
     <p class="seccion-titulo">Baliabideak</p>
 
     <div class="shortcuts">
-      <a class="shortcut" href="https://www.desmos.com/calculator?lang=es" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-          <line x1="12" y1="22.08" x2="12" y2="12"/>
-        </svg>
-        Desmos
-      </a>
       <a class="shortcut" href="https://selectividad.intergranada.com/" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
@@ -402,54 +382,40 @@
         </svg>
         Yo quiero aprobar
       </a>
-      <a class="shortcut" href="https://onddiakademia.github.io/TaulaPeriodiko/" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-        </svg>
-        Taula Periodikoa
-      </a>
-      <a class="shortcut" href="https://sintaxis.org/analizador/" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-        </svg>
-        Sintaxis
-      </a>
     </div>
 
     <p class="seccion-titulo">Gaiak</p>
 
     <div class="asignaturas-grid">
-      <div class="asignatura matematika">
+      <div class="asignatura">
         <div class="nombre">Matematika</div>
         <div class="enlaces">
-          <span class="vacio">Oraindik ez dago estekarik</span>
+          <a href="https://www.desmos.com/calculator?lang=es" target="_blank" rel="noopener noreferrer">Desmos</a>
         </div>
       </div>
 
-      <div class="asignatura fisika">
+      <div class="asignatura">
         <div class="nombre">Fisika / Kimika</div>
         <div class="enlaces">
-          <span class="vacio">Oraindik ez dago estekarik</span>
+          <a href="https://onddiakademia.github.io/TaulaPeriodiko/" target="_blank" rel="noopener noreferrer">Taula Periodikoa</a>
         </div>
       </div>
 
-      <div class="asignatura gazte">
+      <div class="asignatura">
         <div class="nombre">Gazte</div>
         <div class="enlaces">
-          <span class="vacio">Oraindik ez dago estekarik</span>
+          <a href="https://sintaxis.org/analizador/" target="_blank" rel="noopener noreferrer">Sintaxis</a>
         </div>
       </div>
 
-      <div class="asignatura euskara">
+      <div class="asignatura">
         <div class="nombre">Euskara</div>
         <div class="enlaces">
           <span class="vacio">Oraindik ez dago estekarik</span>
         </div>
       </div>
 
-      <div class="asignatura ingelesa">
+      <div class="asignatura">
         <div class="nombre">Ingelesa</div>
         <div class="enlaces">
           <span class="vacio">Oraindik ez dago estekarik</span>
