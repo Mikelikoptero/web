@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rutinas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fondo: #f2ecdf;
+      --fondo-tarjeta: #faf6ee;
+      --texto: #3a352d;
+      --texto-suave: #7a7264;
+      --borde: #ddd3c0;
+      --acento: #8a7a5c;
+      --hecho: #a8d5a2;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--fondo);
+      color: var(--texto);
+      font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      max-width: 720px;
+      padding: 64px 24px 24px;
+    }
+
+    h1 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 2.6rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .volver {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: var(--texto-suave);
+      text-decoration: none;
+      border-bottom: 1px solid var(--borde);
+      padding-bottom: 1px;
+    }
+
+    .volver:hover {
+      color: var(--acento);
+      border-bottom-color: var(--acento);
+    }
+
+    main {
+      width: 100%;
+      max-width: 720px;
+      padding: 0 24px 64px;
+    }
+
+    .seccion-titulo {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--texto-suave);
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--borde);
+      padding-bottom: 8px;
+    }
+
+    .fila-entrada {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .fila-entrada input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 14px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      background-color: var(--fondo-tarjeta);
+      color: var(--texto);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .fila-entrada input:focus {
+      border-color: var(--acento);
+    }
+
+    .fila-entrada input::placeholder {
+      color: var(--texto-suave);
+    }
+
+    .boton-cuadrado {
+      flex: none;
+      width: 46px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--acento);
+      border-radius: 8px;
+      background-color: transparent;
+      color: var(--acento);
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .boton-cuadrado:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+    }
+
+    .boton-cuadrado svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .rutina {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background-color: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .rutina:hover {
+      box-shadow: 0 2px 8px rgba(58, 53, 45, 0.06);
+    }
+
+    .rutina .info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .rutina .info .checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--borde);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      background-color: var(--fondo);
+    }
+
+    .rutina .info .checkbox.hecho {
+      background-color: var(--hecho);
+      border-color: var(--hecho);
+    }
+
+    .rutina .info .checkbox.hecho::after {
+      content: "✓";
+      color: var(--texto);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .rutina .info .texto {
+      font-size: 0.95rem;
+    }
+
+    .rutina .info .texto.tachado {
+      text-decoration: line-through;
+      color: var(--texto-suave);
+    }
+
+    .rutina .fecha {
+      font-size: 0.7rem;
+      color: var(--texto-suave);
+      white-space: nowrap;
+    }
+
+    .rutina .eliminar {
+      background: none;
+      border: none;
+      color: var(--texto-suave);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0 4px;
+      transition: color 0.2s ease;
+    }
+
+    .rutina .eliminar:hover {
+      color: #d32f2f;
+    }
+
+    .lista-vacia {
+      color: var(--texto-suave);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 32px 0;
+      border: 1px dashed var(--borde);
+      border-radius: 10px;
+    }
+
+    .filtros {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filtros button {
+      padding: 4px 12px;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      background-color: transparent;
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filtros button:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .filtros button.activo {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .respaldo {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--borde);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .respaldo button {
+      padding: 10px 20px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      background-color: var(--fondo-tarjeta);
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .respaldo button:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .respaldo input[type="file"] {
+      display: none;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: var(--texto-suave);
+    }
+
+    @media (max-width: 540px) {
+      .fila-entrada {
+        flex-wrap: wrap;
+      }
+
+      .fila-entrada input {
+        flex: 1 1 100%;
+      }
+
+      .boton-cuadrado {
+        width: 100%;
+      }
+
+      .rutina {
+        flex-wrap: wrap;
+      }
+
+      .rutina .info {
+        flex: 1 1 100%;
+      }
+
+      .rutina .fecha {
+        font-size: 0.65rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Rutinas</h1>
+    <a class="volver" href="../">Volver al inicio</a>
+  </header>
+
+  <main>
+    <div class="fila-entrada">
+      <input id="input-rutina" type="text" placeholder="Nueva rutina..." autocomplete="off">
+      <button class="boton-cuadrado" id="boton-anadir" type="button" title="Añadir rutina" aria-label="Añadir rutina">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="filtros">
+      <button id="filtro-todas" class="activo" type="button">Todas</button>
+      <button id="filtro-pendientes" type="button">Pendientes</button>
+      <button id="filtro-hechas" type="button">Hechas</button>
+    </div>
+
+    <div id="lista-rutinas"></div>
+
+    <div class="respaldo">
+      <button id="btn-exportar" type="button">Exportar rutinas</button>
+      <button id="btn-importar" type="button">Importar rutinas</button>
+      <input type="file" id="input-archivo" accept=".json">
+    </div>
+  </main>
+
+  <footer>
+    <p>Web personal</p>
+  </footer>
+
+  <script>
+    var CLAVE_RUTINAS = "rutinas";
+    var filtroActual = 'todas';
+
+    var inputRutina = document.getElementById("input-rutina");
+    var botonAnadir = document.getElementById("boton-anadir");
+    var listaRutinas = document.getElementById("lista-rutinas");
+
+    function cargarRutinas() {
+      try {
+        return JSON.parse(localStorage.getItem(CLAVE_RUTINAS)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function guardarRutinas(datos) {
+      localStorage.setItem(CLAVE_RUTINAS, JSON.stringify(datos));
+    }
+
+    function obtenerFecha() {
+      var hoy = new Date();
+      var dd = String(hoy.getDate()).padStart(2, '0');
+      var mm = String(hoy.getMonth() + 1).padStart(2, '0');
+      var yyyy = hoy.getFullYear();
+      return dd + '/' + mm + '/' + yyyy;
+    }
+
+    function mensajeVacio(texto) {
+      var div = document.createElement("div");
+      div.className = "lista-vacia";
+      div.textContent = texto;
+      return div;
+    }
+
+    function renderRutinas() {
+      var rutinas = cargarRutinas();
+      var filtradas = rutinas;
+
+      if (filtroActual === 'pendientes') {
+        filtradas = rutinas.filter(function(r) { return !r.hecho; });
+      } else if (filtroActual === 'hechas') {
+        filtradas = rutinas.filter(function(r) { return r.hecho; });
+      }
+
+      listaRutinas.innerHTML = "";
+      if (filtradas.length === 0) {
+        var mensaje = "No hay rutinas.";
+        if (filtroActual === 'pendientes') mensaje = "¡Todas las rutinas completadas! 🎉";
+        if (filtroActual === 'hechas') mensaje = "No hay rutinas completadas aún.";
+        listaRutinas.appendChild(mensajeVacio(mensaje));
+        return;
+      }
+
+      filtradas.forEach(function(rutina, indice) {
+        var indiceReal = rutinas.indexOf(rutina);
+        var fila = document.createElement("div");
+        fila.className = "rutina";
+
+        var info = document.createElement("div");
+        info.className = "info";
+
+        var checkbox = document.createElement("div");
+        checkbox.className = "checkbox" + (rutina.hecho ? " hecho" : "");
+        checkbox.addEventListener("click", function() {
+          toggleRutina(indiceReal);
+        });
+        info.appendChild(checkbox);
+
+        var texto = document.createElement("span");
+        texto.className = "texto" + (rutina.hecho ? " tachado" : "");
+        texto.textContent = rutina.texto;
+        info.appendChild(texto);
+
+        fila.appendChild(info);
+
+        var fecha = document.createElement("span");
+        fecha.className = "fecha";
+        fecha.textContent = rutina.fecha || '';
+        fila.appendChild(fecha);
+
+        var eliminar = document.createElement("button");
+        eliminar.className = "eliminar";
+        eliminar.textContent = "×";
+        eliminar.title = "Eliminar";
+        eliminar.addEventListener("click", function() {
+          eliminarRutina(indiceReal);
+        });
+        fila.appendChild(eliminar);
+
+        listaRutinas.appendChild(fila);
+      });
+    }
+
+    function toggleRutina(indice) {
+      var rutinas = cargarRutinas();
+      if (rutinas[indice]) {
+        rutinas[indice].hecho = !rutinas[indice].hecho;
+        guardarRutinas(rutinas);
+        renderRutinas();
+      }
+    }
+
+    function eliminarRutina(indice) {
+      var rutinas = cargarRutinas();
+      rutinas.splice(indice, 1);
+      guardarRutinas(rutinas);
+      renderRutinas();
+    }
+
+    function anadirRutina() {
+      var texto = inputRutina.value.trim();
+      if (!texto) {
+        inputRutina.focus();
+        return;
+      }
+      var rutinas = cargarRutinas();
+      rutinas.unshift({ texto: texto, hecho: false, fecha: obtenerFecha() });
+      guardarRutinas(rutinas);
+      inputRutina.value = "";
+      inputRutina.focus();
+      renderRutinas();
+    }
+
+    function exportarRutinas() {
+      var datos = cargarRutinas();
+      var blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "rutinas_backup_" + new Date().toISOString().slice(0,10) + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importarRutinas(evento) {
+      var archivo = evento.target.files[0];
+      if (!archivo) return;
+
+      var lector = new FileReader();
+      lector.onload = function(e) {
+        try {
+          var datos = JSON.parse(e.target.result);
+          if (Array.isArray(datos)) {
+            if (confirm("¿Importar rutinas? Se sobrescribirán los datos actuales.")) {
+              guardarRutinas(datos);
+              renderRutinas();
+              alert("Rutinas importadas correctamente.");
+            }
+          } else {
+            alert("El archivo no tiene el formato correcto.");
+          }
+        } catch (error) {
+          alert("Error al leer el archivo: " + error.message);
+        }
+      };
+      lector.readAsText(archivo);
+      document.getElementById('input-archivo').value = "";
+    }
+
+    botonAnadir.addEventListener("click", anadirRutina);
+    inputRutina.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") anadirRutina();
+    });
+
+    document.getElementById('filtro-todas').addEventListener('click', function() {
+      filtroActual = 'todas';
+      document.querySelectorAll('.filtros button').forEach(function(b) { b.classList.remove('activo'); });
+      this.classList.add('activo');
+      renderRutinas();
+    });
+
+    document.getElementById('filtro-pendientes').addEventListener('click', function() {
+      filtroActual = 'pendientes';
+      document.querySelectorAll('.filtros button').forEach(function(b) { b.classList.remove('activo'); });
+      this.classList.add('activo');
+      renderRutinas();
+    });
+
+    document.getElementById('filtro-hechas').addEventListener('click', function() {
+      filtroActual = 'hechas';
+      document.querySelectorAll('.filtros button').forEach(function(b) { b.classList.remove('activo'); });
+      this.classList.add('activo');
+      renderRutinas();
+    });
+
+    document.getElementById('btn-exportar').addEventListener('click', exportarRutinas);
+    document.getElementById('btn-importar').addEventListener('click', function() {
+      document.getElementById('input-archivo').click();
+    });
+    document.getElementById('input-archivo').addEventListener('change', importarRutinas);
+
+    renderRutinas();
+  </script>
+</body>
+</html>
