@@ -64,7 +64,7 @@
     }
 
     .tiempo-widget .icono-tiempo {
-      font-size: 2rem;
+      font-size: 2.4rem;
       line-height: 1;
     }
 
@@ -479,64 +479,38 @@
     cargarNotas();
 
     // ===== WIDGET DEL TIEMPO =====
-    var CLAVE_TIEMPO = "tiempoCache";
-
     function obtenerTiempo() {
-      var ciudad = 'Bilbao'; // Puedes cambiarlo por tu ciudad
-      var url = 'https://wttr.in/' + ciudad + '?format=%C|%t|%l&lang=es';
+      var ciudad = 'Bilbao';
+      // Usar formato JSON para obtener datos limpios
+      var url = 'https://wttr.in/' + ciudad + '?format=j1&lang=es';
       
-      // Intentar cargar desde caché
-      var cache = localStorage.getItem(CLAVE_TIEMPO);
-      if (cache) {
-        try {
-          var datosCache = JSON.parse(cache);
-          var ahora = new Date().getTime();
-          // Si la caché tiene menos de 30 minutos, usarla
-          if (ahora - datosCache.timestamp < 30 * 60 * 1000) {
-            actualizarWidget(datosCache.datos);
-            return;
-          }
-        } catch (e) {}
-      }
-
-      // Si no hay caché o ha expirado, hacer la petición
       fetch(url)
         .then(function(response) {
           if (!response.ok) throw new Error('Error al obtener el tiempo');
-          return response.text();
+          return response.json();
         })
         .then(function(data) {
-          var partes = data.split('|');
-          var descripcion = partes[0].trim();
-          var temperatura = partes[1].trim();
-          var localidad = partes[2].trim();
+          var current = data.current_condition[0];
+          var descripcion = current.lang_es[0].value || current.weatherDesc[0].value || '--';
+          var temperatura = current.temp_C + '°C';
+          var localidad = data.nearest_area[0].areaName[0].value || ciudad;
           
-          var datos = {
-            descripcion: descripcion,
-            temperatura: temperatura,
-            ciudad: localidad
-          };
-          
-          // Guardar en caché
-          localStorage.setItem(CLAVE_TIEMPO, JSON.stringify({
-            timestamp: new Date().getTime(),
-            datos: datos
-          }));
-          
-          actualizarWidget(datos);
+          actualizarWidget(descripcion, temperatura, localidad);
         })
         .catch(function(error) {
           console.error('Error al obtener el tiempo:', error);
           document.getElementById('icono-tiempo').textContent = '❓';
           document.getElementById('descripcion').textContent = 'No disponible';
+          document.getElementById('temperatura').textContent = '--°C';
+          document.getElementById('ciudad').textContent = '--';
         });
     }
 
-    function actualizarWidget(datos) {
-      document.getElementById('icono-tiempo').textContent = obtenerIcono(datos.descripcion);
-      document.getElementById('temperatura').textContent = datos.temperatura || '--°C';
-      document.getElementById('descripcion').textContent = datos.descripcion || '--';
-      document.getElementById('ciudad').textContent = datos.ciudad || '--';
+    function actualizarWidget(descripcion, temperatura, ciudad) {
+      document.getElementById('icono-tiempo').textContent = obtenerIcono(descripcion);
+      document.getElementById('temperatura').textContent = temperatura;
+      document.getElementById('descripcion').textContent = descripcion;
+      document.getElementById('ciudad').textContent = ciudad;
     }
 
     function obtenerIcono(descripcion) {
