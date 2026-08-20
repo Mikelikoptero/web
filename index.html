@@ -61,6 +61,15 @@
       padding: 16px 20px;
       margin-bottom: 24px;
       flex-wrap: wrap;
+      text-decoration: none;
+      color: var(--texto);
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    .tiempo-widget:hover {
+      box-shadow: 0 4px 14px rgba(58, 53, 45, 0.08);
+      transform: translateY(-1px);
     }
 
     .tiempo-widget .icono-tiempo {
@@ -87,11 +96,28 @@
       color: var(--texto-suave);
       font-size: 0.8rem;
       margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tiempo-widget .ciudad svg {
+      width: 14px;
+      height: 14px;
     }
 
     .tiempo-widget .cargando {
       color: var(--texto-suave);
       font-size: 0.9rem;
+    }
+
+    .tiempo-widget .fuente {
+      font-size: 0.6rem;
+      color: var(--texto-suave);
+      opacity: 0.5;
+      margin-left: auto;
+      width: 100%;
+      text-align: right;
     }
 
     /* Notas rápidas */
@@ -321,6 +347,10 @@
       .tiempo-widget .ciudad {
         margin-left: 0;
       }
+
+      .tiempo-widget .fuente {
+        text-align: left;
+      }
     }
   </style>
 </head>
@@ -329,14 +359,22 @@
     <p class="seccion-titulo">Widgets</p>
 
     <!-- Widget del tiempo -->
-    <div class="tiempo-widget" id="tiempo-widget">
+    <a class="tiempo-widget" id="tiempo-widget" href="https://www.euskalmet.euskadi.eus/eguraldia/hernani/" target="_blank" rel="noopener noreferrer">
       <div class="icono-tiempo" id="icono-tiempo">⏳</div>
       <div class="info-tiempo">
         <div class="temperatura" id="temperatura">--°C</div>
-        <div class="descripcion" id="descripcion">Cargando...</div>
+        <div class="descripcion" id="descripcion">Kargatzen...</div>
       </div>
-      <div class="ciudad" id="ciudad">--</div>
-    </div>
+      <div class="ciudad" id="ciudad">
+        Hernani
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+      </div>
+      <div class="fuente">Euskalmet</div>
+    </a>
 
     <!-- Notas rápidas -->
     <div class="notas-widget">
@@ -478,11 +516,40 @@
     textareaNotas.addEventListener('input', guardarNotas);
     cargarNotas();
 
-    // ===== WIDGET DEL TIEMPO =====
-    function obtenerTiempo() {
-      var ciudad = 'Bilbao';
-      // Usar formato JSON para obtener datos limpios
-      var url = 'https://wttr.in/' + ciudad + '?format=j1&lang=es';
+    // ===== WIDGET DEL TIEMPO (Euskalmet) =====
+    function obtenerTiempoEuskalmet() {
+      // Usar la API de Euskalmet para Hernani (código municipal: 2003)
+      var url = 'https://www.euskalmet.euskadi.eus/api/estado/2003';
+      
+      fetch(url)
+        .then(function(response) {
+          if (!response.ok) throw new Error('Error al obtener el tiempo');
+          return response.json();
+        })
+        .then(function(data) {
+          // La estructura de la API de Euskalmet puede variar
+          // Esta es una estructura típica
+          if (data && data.properties) {
+            var temp = data.properties.temperatura || '--';
+            var icono = data.properties.ikonoa || '';
+            var descripcion = data.properties.eguraldia || '';
+            
+            actualizarWidgetEuskalmet(temp, icono, descripcion);
+          } else {
+            // Fallback: usar wttr.in si Euskalmet no responde como esperamos
+            obtenerTiempoWTTR();
+          }
+        })
+        .catch(function(error) {
+          console.error('Error con Euskalmet:', error);
+          // Fallback a wttr.in
+          obtenerTiempoWTTR();
+        });
+    }
+
+    // Fallback con wttr.in (más fiable)
+    function obtenerTiempoWTTR() {
+      var url = 'https://wttr.in/Hernani?format=j1&lang=es';
       
       fetch(url)
         .then(function(response) {
@@ -491,26 +558,32 @@
         })
         .then(function(data) {
           var current = data.current_condition[0];
-          var descripcion = current.lang_es[0].value || current.weatherDesc[0].value || '--';
-          var temperatura = current.temp_C + '°C';
-          var localidad = data.nearest_area[0].areaName[0].value || ciudad;
+          var descripcion = current.lang_es ? current.lang_es[0].value : current.weatherDesc[0].value;
+          var temperatura = current.temp_C;
+          var localidad = data.nearest_area[0].areaName[0].value;
           
-          actualizarWidget(descripcion, temperatura, localidad);
+          actualizarWidgetConDatos(descripcion, temperatura, localidad);
         })
         .catch(function(error) {
           console.error('Error al obtener el tiempo:', error);
           document.getElementById('icono-tiempo').textContent = '❓';
           document.getElementById('descripcion').textContent = 'No disponible';
           document.getElementById('temperatura').textContent = '--°C';
-          document.getElementById('ciudad').textContent = '--';
         });
     }
 
-    function actualizarWidget(descripcion, temperatura, ciudad) {
+    function actualizarWidgetEuskalmet(temp, icono, descripcion) {
+      document.getElementById('icono-tiempo').textContent = icono || obtenerIconoPorDescripcion(descripcion);
+      document.getElementById('temperatura').textContent = temp + '°C';
+      document.getElementById('descripcion').textContent = descripcion || '--';
+      document.getElementById('ciudad').innerHTML = 'Hernani <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+    }
+
+    function actualizarWidgetConDatos(descripcion, temperatura, localidad) {
       document.getElementById('icono-tiempo').textContent = obtenerIcono(descripcion);
-      document.getElementById('temperatura').textContent = temperatura;
+      document.getElementById('temperatura').textContent = temperatura + '°C';
       document.getElementById('descripcion').textContent = descripcion;
-      document.getElementById('ciudad').textContent = ciudad;
+      document.getElementById('ciudad').innerHTML = localidad + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
     }
 
     function obtenerIcono(descripcion) {
@@ -526,10 +599,24 @@
       return '🌤️';
     }
 
-    // Cargar el tiempo al inicio
-    obtenerTiempo();
+    function obtenerIconoPorDescripcion(descripcion) {
+      // Para el caso de que Euskalmet devuelva el icono en texto
+      var desc = (descripcion || '').toLowerCase();
+      if (desc.includes('eguzki') || desc.includes('argi')) return '☀️';
+      if (desc.includes('hodei') && desc.includes('partzial')) return '⛅';
+      if (desc.includes('hodei')) return '☁️';
+      if (desc.includes('euri')) return '🌧️';
+      if (desc.includes('ekaitz')) return '⛈️';
+      if (desc.includes('elur')) return '❄️';
+      if (desc.includes('laino')) return '🌫️';
+      if (desc.includes('haize')) return '💨';
+      return '🌤️';
+    }
+
+    // Cargar el tiempo al inicio (intentar Euskalmet primero)
+    obtenerTiempoEuskalmet();
     // Actualizar cada 30 minutos
-    setInterval(obtenerTiempo, 30 * 60 * 1000);
+    setInterval(obtenerTiempoEuskalmet, 30 * 60 * 1000);
 
     // ===== MENÚ VIDEO =====
     document.getElementById('boton-video').addEventListener('click', function() {
