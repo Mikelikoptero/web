@@ -78,6 +78,7 @@
       padding: 6px;
       margin-bottom: 28px;
       gap: 6px;
+      flex-wrap: wrap;
     }
 
     .selector button {
@@ -368,6 +369,41 @@
       height: 14px;
     }
 
+    /* Botón de cita */
+    .boton-cita {
+      background: none;
+      border: 1px solid var(--borde);
+      border-radius: 4px;
+      padding: 4px 6px;
+      color: var(--texto-suave);
+      cursor: pointer;
+      font-size: 0.7rem;
+      line-height: 1;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+    }
+
+    .boton-cita:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .boton-cita.abierto {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .boton-cita svg {
+      width: 14px;
+      height: 14px;
+    }
+
     /* Área de anotaciones */
     .nota-area {
       display: none;
@@ -404,6 +440,75 @@
     .nota-area textarea::placeholder {
       color: var(--texto-suave);
       opacity: 0.5;
+    }
+
+    /* Área de cita */
+    .cita-area {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--borde);
+      width: 100%;
+    }
+
+    .cita-area.visible {
+      display: block;
+    }
+
+    .cita-area textarea {
+      width: 100%;
+      min-height: 60px;
+      padding: 10px 12px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      background-color: var(--fondo);
+      color: var(--texto);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    .cita-area textarea:focus {
+      border-color: var(--acento);
+    }
+
+    .cita-area textarea::placeholder {
+      color: var(--texto-suave);
+      opacity: 0.5;
+    }
+
+    /* Estadísticas */
+    .estadisticas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+      padding: 16px;
+      background-color: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+    }
+
+    .estadisticas .stat {
+      text-align: center;
+    }
+
+    .estadisticas .stat .numero {
+      font-size: 1.8rem;
+      font-weight: 600;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      color: var(--acento);
+    }
+
+    .estadisticas .stat .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--texto-suave);
     }
 
     .lista-vacia {
@@ -576,6 +681,10 @@
       .respaldo button {
         width: 100%;
       }
+
+      .estadisticas {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
   </style>
 </head>
@@ -589,6 +698,7 @@
     <div class="selector">
       <button id="tab-para-leer" class="activo" type="button">Para leer</button>
       <button id="tab-leidos" type="button">Leídos</button>
+      <button id="tab-estadisticas" type="button">Estadísticas</button>
     </div>
 
     <div id="vista-para-leer">
@@ -618,6 +728,10 @@
       <div id="lista-leidos"></div>
     </div>
 
+    <div id="vista-estadisticas" class="oculto">
+      <div id="estadisticas-container"></div>
+    </div>
+
     <div class="respaldo">
       <button id="btn-exportar" type="button">Exportar datos</button>
       <button id="btn-importar" type="button">Importar datos</button>
@@ -638,10 +752,13 @@
     var botonAnadir = document.getElementById("boton-anadir");
     var listaParaLeer = document.getElementById("lista-para-leer");
     var listaLeidos = document.getElementById("lista-leidos");
+    var estadisticasContainer = document.getElementById("estadisticas-container");
     var tabParaLeer = document.getElementById("tab-para-leer");
     var tabLeidos = document.getElementById("tab-leidos");
+    var tabEstadisticas = document.getElementById("tab-estadisticas");
     var vistaParaLeer = document.getElementById("vista-para-leer");
     var vistaLeidos = document.getElementById("vista-leidos");
+    var vistaEstadisticas = document.getElementById("vista-estadisticas");
     var btnExportar = document.getElementById("btn-exportar");
     var btnImportar = document.getElementById("btn-importar");
     var inputArchivo = document.getElementById("input-archivo");
@@ -753,6 +870,40 @@
       var path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path2.setAttribute("d", "M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z");
       svg.appendChild(path2);
+      
+      return svg;
+    }
+
+    function svgQuote() {
+      var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("fill", "none");
+      svg.setAttribute("stroke", "currentColor");
+      svg.setAttribute("stroke-width", "2");
+      svg.setAttribute("stroke-linecap", "round");
+      svg.setAttribute("stroke-linejoin", "round");
+      
+      var path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path1.setAttribute("d", "M10 11h-4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1z");
+      svg.appendChild(path1);
+      
+      var path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path2.setAttribute("d", "M19 11h-4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1z");
+      svg.appendChild(path2);
+      
+      var line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line1.setAttribute("x1", "5");
+      line1.setAttribute("y1", "15");
+      line1.setAttribute("x2", "19");
+      line1.setAttribute("y2", "15");
+      svg.appendChild(line1);
+      
+      var line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line2.setAttribute("x1", "5");
+      line2.setAttribute("y1", "18");
+      line2.setAttribute("x2", "19");
+      line2.setAttribute("y2", "18");
+      svg.appendChild(line2);
       
       return svg;
     }
@@ -959,6 +1110,28 @@
       return contenedor;
     }
 
+    function crearCita(libro, indice) {
+      var contenedor = document.createElement("div");
+      contenedor.className = "cita-area";
+      
+      var textarea = document.createElement("textarea");
+      textarea.value = libro.cita || '';
+      textarea.placeholder = "Escribe aquí una cita destacada...";
+      textarea.setAttribute("data-indice", indice);
+      
+      textarea.addEventListener("input", function() {
+        var idx = parseInt(this.getAttribute("data-indice"));
+        var leidos = cargar(CLAVE_LEIDOS);
+        if (leidos[idx]) {
+          leidos[idx].cita = this.value;
+          guardar(CLAVE_LEIDOS, leidos);
+        }
+      });
+
+      contenedor.appendChild(textarea);
+      return contenedor;
+    }
+
     function crearBotonNota(indice) {
       var boton = document.createElement("button");
       boton.className = "boton-nota";
@@ -973,21 +1146,59 @@
         var idx = parseInt(this.getAttribute("data-indice"));
         var libroElement = this.closest('.libro');
         var notaArea = libroElement.querySelector('.nota-area');
+        var citaArea = libroElement.querySelector('.cita-area');
         var estaAbierto = notaArea.classList.contains('visible');
         
-        // Cerrar todas las notas abiertas
-        document.querySelectorAll('.nota-area.visible').forEach(function(el) {
+        // Cerrar todas las notas y citas abiertas
+        document.querySelectorAll('.nota-area.visible, .cita-area.visible').forEach(function(el) {
           el.classList.remove('visible');
         });
-        document.querySelectorAll('.boton-nota.abierto').forEach(function(el) {
+        document.querySelectorAll('.boton-nota.abierto, .boton-cita.abierto').forEach(function(el) {
           el.classList.remove('abierto');
         });
         
         if (!estaAbierto) {
           notaArea.classList.add('visible');
           this.classList.add('abierto');
-          // Enfocar el textarea
           var textarea = notaArea.querySelector('textarea');
+          if (textarea) {
+            setTimeout(function() { textarea.focus(); }, 50);
+          }
+        }
+      });
+      
+      return boton;
+    }
+
+    function crearBotonCita(indice) {
+      var boton = document.createElement("button");
+      boton.className = "boton-cita";
+      boton.type = "button";
+      boton.setAttribute("data-indice", indice);
+      boton.title = "Abrir cita";
+      boton.setAttribute("aria-label", "Abrir cita");
+      boton.appendChild(svgQuote());
+      
+      boton.addEventListener("click", function(e) {
+        e.stopPropagation();
+        var idx = parseInt(this.getAttribute("data-indice"));
+        var libroElement = this.closest('.libro');
+        var citaArea = libroElement.querySelector('.cita-area');
+        var notaArea = libroElement.querySelector('.nota-area');
+        var estaAbierto = citaArea.classList.contains('visible');
+        
+        // Cerrar todas las notas y citas abiertas
+        document.querySelectorAll('.nota-area.visible, .cita-area.visible').forEach(function(el) {
+          el.classList.remove('visible');
+        });
+        document.querySelectorAll('.boton-nota.abierto, .boton-cita.abierto').forEach(function(el) {
+          el.classList.remove('abierto');
+        });
+        
+        if (!estaAbierto) {
+          citaArea.classList.add('visible');
+          this.classList.add('abierto');
+          var textarea = citaArea.querySelector('textarea');
           if (textarea) {
             setTimeout(function() { textarea.focus(); }, 50);
           }
@@ -1003,6 +1214,7 @@
         leidos[indice].puntuacion = puntuacion;
         guardar(CLAVE_LEIDOS, leidos);
         renderLeidos();
+        renderEstadisticas();
       }
     }
 
@@ -1012,6 +1224,7 @@
         leidos[indice].fecha = fecha;
         guardar(CLAVE_LEIDOS, leidos);
         renderLeidos();
+        renderEstadisticas();
       }
     }
 
@@ -1111,6 +1324,7 @@
         filaAcciones.appendChild(crearEstrellas(libro, indiceReal));
         filaAcciones.appendChild(crearFechaLeido(libro, indiceReal));
         filaAcciones.appendChild(crearBotonNota(indiceReal));
+        filaAcciones.appendChild(crearBotonCita(indiceReal));
         
         acciones.appendChild(filaAcciones);
         filaPrincipal.appendChild(acciones);
@@ -1118,9 +1332,69 @@
         
         // Área de nota
         fila.appendChild(crearNota(libro, indiceReal));
+        // Área de cita
+        fila.appendChild(crearCita(libro, indiceReal));
         
         listaLeidos.appendChild(fila);
       });
+    }
+
+    function renderEstadisticas() {
+      var leidos = cargar(CLAVE_LEIDOS);
+      var total = leidos.length;
+      var mediaEstrellas = 0;
+      var librosConPuntuacion = 0;
+      var libroMejor = null;
+      var libroPeor = null;
+      var citas = [];
+      var puntuaciones = [];
+
+      leidos.forEach(function(libro) {
+        if (typeof libro.puntuacion !== 'undefined' && libro.puntuacion > 0) {
+          puntuaciones.push(libro.puntuacion);
+          librosConPuntuacion++;
+          mediaEstrellas += libro.puntuacion;
+          
+          if (!libroMejor || libro.puntuacion > libroMejor.puntuacion) {
+            libroMejor = libro;
+          }
+          if (!libroPeor || libro.puntuacion < libroPeor.puntuacion) {
+            libroPeor = libro;
+          }
+        }
+        if (libro.cita && libro.cita.trim()) {
+          citas.push({ titulo: libro.titulo, autor: libro.autor, cita: libro.cita });
+        }
+      });
+
+      if (librosConPuntuacion > 0) {
+        mediaEstrellas = (mediaEstrellas / librosConPuntuacion).toFixed(1);
+      }
+
+      var html = '<div class="estadisticas">';
+      html += '<div class="stat"><div class="numero">' + total + '</div><div class="label">Libros leídos</div></div>';
+      html += '<div class="stat"><div class="numero">' + mediaEstrellas + ' ★</div><div class="label">Media estrellas</div></div>';
+      
+      if (libroMejor) {
+        html += '<div class="stat"><div class="numero">' + libroMejor.titulo + '</div><div class="label">Mejor valorado</div></div>';
+      }
+      
+      html += '</div>';
+
+      // Citas destacadas
+      if (citas.length > 0) {
+        html += '<div class="seccion-titulo" style="margin-top:16px;">Citas destacadas</div>';
+        citas.forEach(function(cita) {
+          html += '<div class="libro" style="flex-direction:column;align-items:flex-start;padding:12px 16px;">';
+          html += '<div style="font-style:italic;font-size:0.9rem;color:var(--texto);margin-bottom:4px;">" ' + cita.cita + ' "</div>';
+          html += '<div style="font-size:0.8rem;color:var(--texto-suave);">— ' + cita.titulo + ', ' + cita.autor + '</div>';
+          html += '</div>';
+        });
+      } else {
+        html += '<div class="lista-vacia">Aún no hay citas destacadas. Añade citas a tus libros leídos.</div>';
+      }
+
+      estadisticasContainer.innerHTML = html;
     }
 
     function anadirLibro() {
@@ -1146,26 +1420,42 @@
       libro.puntuacion = 0;
       libro.fecha = obtenerFechaActual();
       libro.nota = '';
+      libro.cita = '';
       leidos.unshift(libro);
       guardar(CLAVE_PARA_LEER, paraLeer);
       guardar(CLAVE_LEIDOS, leidos);
       renderParaLeer();
       renderLeidos();
+      renderEstadisticas();
     }
 
     function mostrarParaLeer() {
       tabParaLeer.classList.add("activo");
       tabLeidos.classList.remove("activo");
+      tabEstadisticas.classList.remove("activo");
       vistaParaLeer.classList.remove("oculto");
       vistaLeidos.classList.add("oculto");
+      vistaEstadisticas.classList.add("oculto");
     }
 
     function mostrarLeidos() {
       tabLeidos.classList.add("activo");
       tabParaLeer.classList.remove("activo");
+      tabEstadisticas.classList.remove("activo");
       vistaLeidos.classList.remove("oculto");
       vistaParaLeer.classList.add("oculto");
+      vistaEstadisticas.classList.add("oculto");
       renderLeidos();
+    }
+
+    function mostrarEstadisticas() {
+      tabEstadisticas.classList.add("activo");
+      tabParaLeer.classList.remove("activo");
+      tabLeidos.classList.remove("activo");
+      vistaEstadisticas.classList.remove("oculto");
+      vistaParaLeer.classList.add("oculto");
+      vistaLeidos.classList.add("oculto");
+      renderEstadisticas();
     }
 
     function toggleDirection() {
@@ -1211,6 +1501,7 @@
               guardar(CLAVE_LEIDOS, datos.leidos);
               renderParaLeer();
               renderLeidos();
+              renderEstadisticas();
               alert("Datos importados correctamente.");
             }
           } else {
@@ -1234,6 +1525,7 @@
     });
     tabParaLeer.addEventListener("click", mostrarParaLeer);
     tabLeidos.addEventListener("click", mostrarLeidos);
+    tabEstadisticas.addEventListener("click", mostrarEstadisticas);
     ordenDirection.addEventListener("click", toggleDirection);
     ordenCampo.addEventListener("change", cambiarOrden);
     btnExportar.addEventListener("click", exportarDatos);
@@ -1243,6 +1535,8 @@
     inputArchivo.addEventListener("change", importarDatos);
 
     renderParaLeer();
+    renderLeidos();
+    renderEstadisticas();
   </script>
 </body>
 </html>
