@@ -38,7 +38,7 @@
 
     header {
       width: 100%;
-      max-width: 720px;
+      max-width: 960px;
       padding: 64px 24px 24px;
     }
 
@@ -57,6 +57,7 @@
       text-decoration: none;
       border-bottom: 1px solid var(--borde);
       padding-bottom: 1px;
+      transition: color 0.2s ease, border-color 0.2s ease;
     }
 
     .volver:hover {
@@ -66,7 +67,7 @@
 
     main {
       width: 100%;
-      max-width: 720px;
+      max-width: 960px;
       padding: 0 24px 64px;
     }
 
@@ -117,11 +118,12 @@
       font-family: inherit;
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .fila-entrada input:focus {
       border-color: var(--acento);
+      box-shadow: 0 0 0 3px rgba(138, 122, 92, 0.15);
     }
 
     .fila-entrada input::placeholder {
@@ -140,12 +142,17 @@
       background-color: transparent;
       color: var(--acento);
       cursor: pointer;
-      transition: background-color 0.2s ease, color 0.2s ease;
+      transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
     }
 
     .boton-cuadrado:hover {
       background-color: var(--acento);
       color: var(--fondo-tarjeta);
+      transform: scale(1.02);
+    }
+
+    .boton-cuadrado:active {
+      transform: scale(0.95);
     }
 
     .boton-cuadrado svg {
@@ -161,11 +168,13 @@
       border-radius: 10px;
       padding: 16px 20px;
       margin-bottom: 12px;
-      transition: box-shadow 0.2s ease, transform 0.2s ease;
+      transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
     }
 
     .libro:hover {
-      box-shadow: 0 2px 8px rgba(58, 53, 45, 0.06);
+      box-shadow: 0 4px 14px rgba(58, 53, 45, 0.08);
+      transform: translateY(-2px);
+      border-color: var(--acento);
     }
 
     .libro .fila-principal {
@@ -308,7 +317,7 @@
     }
 
     .estrella-btn:hover {
-      transform: scale(1.1);
+      transform: scale(1.15);
     }
 
     .estrella-btn.activa {
@@ -334,7 +343,6 @@
       flex-wrap: wrap;
     }
 
-    /* Botón de anotaciones - solo icono */
     .boton-nota {
       background: none;
       border: 1px solid var(--borde);
@@ -356,6 +364,7 @@
       background-color: var(--acento);
       color: var(--fondo-tarjeta);
       border-color: var(--acento);
+      transform: scale(1.05);
     }
 
     .boton-nota.abierto {
@@ -369,7 +378,6 @@
       height: 14px;
     }
 
-    /* Botón de cita */
     .boton-cita {
       background: none;
       border: 1px solid var(--borde);
@@ -391,6 +399,7 @@
       background-color: var(--acento);
       color: var(--fondo-tarjeta);
       border-color: var(--acento);
+      transform: scale(1.05);
     }
 
     .boton-cita.abierto {
@@ -404,13 +413,13 @@
       height: 14px;
     }
 
-    /* Área de anotaciones */
     .nota-area {
       display: none;
       margin-top: 12px;
       padding-top: 12px;
       border-top: 1px solid var(--borde);
       width: 100%;
+      animation: fadeIn 0.3s ease;
     }
 
     .nota-area.visible {
@@ -429,12 +438,13 @@
       font-size: 0.85rem;
       outline: none;
       resize: vertical;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
       line-height: 1.5;
     }
 
     .nota-area textarea:focus {
       border-color: var(--acento);
+      box-shadow: 0 0 0 3px rgba(138, 122, 92, 0.1);
     }
 
     .nota-area textarea::placeholder {
@@ -442,13 +452,13 @@
       opacity: 0.5;
     }
 
-    /* Área de cita */
     .cita-area {
       display: none;
       margin-top: 12px;
       padding-top: 12px;
       border-top: 1px solid var(--borde);
       width: 100%;
+      animation: fadeIn 0.3s ease;
     }
 
     .cita-area.visible {
@@ -467,13 +477,14 @@
       font-size: 0.85rem;
       outline: none;
       resize: vertical;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
       line-height: 1.5;
       font-style: italic;
     }
 
     .cita-area textarea:focus {
       border-color: var(--acento);
+      box-shadow: 0 0 0 3px rgba(138, 122, 92, 0.1);
     }
 
     .cita-area textarea::placeholder {
@@ -583,11 +594,12 @@
       font-size: 0.85rem;
       outline: none;
       cursor: pointer;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .ordenacion select:focus {
       border-color: var(--acento);
+      box-shadow: 0 0 0 3px rgba(138, 122, 92, 0.1);
     }
 
     .ordenacion button {
@@ -612,6 +624,36 @@
       background-color: var(--acento);
       color: var(--fondo-tarjeta);
       border-color: var(--acento);
+    }
+
+    /* Búsqueda */
+    .busqueda {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .busqueda input {
+      flex: 1;
+      padding: 8px 14px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      background-color: var(--fondo-tarjeta);
+      color: var(--texto);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .busqueda input:focus {
+      border-color: var(--acento);
+      box-shadow: 0 0 0 3px rgba(138, 122, 92, 0.1);
+    }
+
+    .busqueda input::placeholder {
+      color: var(--texto-suave);
+      opacity: 0.6;
     }
 
     .respaldo {
@@ -640,6 +682,7 @@
       background-color: var(--acento);
       color: var(--fondo-tarjeta);
       border-color: var(--acento);
+      transform: translateY(-1px);
     }
 
     .respaldo input[type="file"] {
@@ -653,76 +696,18 @@
       color: var(--texto-suave);
     }
 
-    @media (max-width: 540px) {
-      .fila-entrada {
-        flex-wrap: wrap;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 0 16px 40px;
       }
 
-      .fila-entrada input {
-        flex: 1 1 100%;
-      }
-
-      .boton-cuadrado {
-        width: 100%;
-      }
-
-      .libro .fila-principal {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .libro .info {
-        min-width: unset;
-      }
-
-      .libro .acciones {
-        align-items: stretch;
-        padding-top: 4px;
-        border-top: 1px solid var(--borde);
-      }
-
-      .libro .acciones .fila-acciones {
-        justify-content: flex-start;
-        flex-wrap: wrap;
-      }
-
-      .libro .fecha {
-        justify-content: flex-start;
-      }
-
-      .libro .fecha .editor-fecha {
-        flex-wrap: wrap;
-      }
-
-      .libro .fecha .editor-fecha input[type="date"] {
-        flex: 1;
-        min-width: 100px;
-        max-width: unset;
-      }
-
-      .ordenacion {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .ordenacion select {
-        width: 100%;
-      }
-
-      .respaldo {
-        flex-direction: column;
-      }
-
-      .respaldo button {
-        width: 100%;
-      }
-
-      .estadisticas {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .estadisticas-container .filtro-anos {
-        justify-content: center;
+      header {
+        padding: 40px 16px 16px;
       }
     }
   </style>
@@ -756,13 +741,17 @@
 
     <div id="vista-leidos" class="oculto">
       <div class="ordenacion">
-        <label for="orden-campo">Ordenar por:</label>
-        <select id="orden-campo">
+        <label for="orden-campo-leidos">Ordenar por:</label>
+        <select id="orden-campo-leidos">
           <option value="fecha">Fecha</option>
           <option value="titulo">Título</option>
           <option value="autor">Autor</option>
+          <option value="puntuacion">Puntuación</option>
         </select>
-        <button id="orden-direction" type="button">Descendente ↓</button>
+        <button id="orden-direction-leidos" type="button">Descendente ↓</button>
+      </div>
+      <div class="busqueda">
+        <input id="busqueda-leidos" type="text" placeholder="Buscar libro o autor..." autocomplete="off">
       </div>
       <div id="lista-leidos"></div>
     </div>
@@ -801,10 +790,11 @@
     var btnExportar = document.getElementById("btn-exportar");
     var btnImportar = document.getElementById("btn-importar");
     var inputArchivo = document.getElementById("input-archivo");
-    var ordenCampo = document.getElementById("orden-campo");
-    var ordenDirection = document.getElementById("orden-direction");
+    var ordenCampoLeidos = document.getElementById("orden-campo-leidos");
+    var ordenDirectionLeidos = document.getElementById("orden-direction-leidos");
+    var busquedaLeidos = document.getElementById("busqueda-leidos");
 
-    var direccionAscendente = false;
+    var direccionAscendenteLeidos = false;
     var filtroAno = 'todos';
 
     function cargar(clave) {
@@ -1198,7 +1188,6 @@
         var citaArea = libroElement.querySelector('.cita-area');
         var estaAbierto = notaArea.classList.contains('visible');
         
-        // Cerrar todas las notas y citas abiertas
         document.querySelectorAll('.nota-area.visible, .cita-area.visible').forEach(function(el) {
           el.classList.remove('visible');
         });
@@ -1236,7 +1225,6 @@
         var notaArea = libroElement.querySelector('.nota-area');
         var estaAbierto = citaArea.classList.contains('visible');
         
-        // Cerrar todas las notas y citas abiertas
         document.querySelectorAll('.nota-area.visible, .cita-area.visible').forEach(function(el) {
           el.classList.remove('visible');
         });
@@ -1295,6 +1283,9 @@
         } else if (campo === 'autor') {
           valorA = (a.autor || '').toLowerCase();
           valorB = (b.autor || '').toLowerCase();
+        } else if (campo === 'puntuacion') {
+          valorA = a.puntuacion || 0;
+          valorB = b.puntuacion || 0;
         }
         
         if (valorA < valorB) return ascendente ? -1 : 1;
@@ -1303,6 +1294,16 @@
       });
       
       return copia;
+    }
+
+    function filtrarLibrosPorBusqueda(libros, texto) {
+      if (!texto || texto.trim() === '') return libros;
+      var termino = texto.toLowerCase().trim();
+      return libros.filter(function(libro) {
+        var titulo = (libro.titulo || '').toLowerCase();
+        var autor = (libro.autor || '').toLowerCase();
+        return titulo.includes(termino) || autor.includes(termino);
+      });
     }
 
     function renderParaLeer() {
@@ -1343,18 +1344,24 @@
 
     function renderLeidos() {
       var libros = cargar(CLAVE_LEIDOS);
-      var campo = ordenCampo.value;
-      var ascendente = direccionAscendente;
+      var campo = ordenCampoLeidos.value;
+      var ascendente = direccionAscendenteLeidos;
       
       var librosOrdenados = ordenarLibros(libros, campo, ascendente);
+      var textoBusqueda = busquedaLeidos.value;
+      var librosFiltrados = filtrarLibrosPorBusqueda(librosOrdenados, textoBusqueda);
       
       listaLeidos.innerHTML = "";
-      if (librosOrdenados.length === 0) {
-        listaLeidos.appendChild(mensajeVacio("Todavía no hay libros leídos."));
+      if (librosFiltrados.length === 0) {
+        var mensaje = "No hay libros que coincidan con la búsqueda.";
+        if (libros.length === 0) {
+          mensaje = "Todavía no hay libros leídos.";
+        }
+        listaLeidos.appendChild(mensajeVacio(mensaje));
         return;
       }
       
-      librosOrdenados.forEach(function (libro) {
+      librosFiltrados.forEach(function (libro) {
         var indiceReal = libros.indexOf(libro);
         
         var fila = document.createElement("div");
@@ -1379,9 +1386,7 @@
         filaPrincipal.appendChild(acciones);
         fila.appendChild(filaPrincipal);
         
-        // Área de nota
         fila.appendChild(crearNota(libro, indiceReal));
-        // Área de cita
         fila.appendChild(crearCita(libro, indiceReal));
         
         listaLeidos.appendChild(fila);
@@ -1391,7 +1396,6 @@
     function renderEstadisticas() {
       var leidos = cargar(CLAVE_LEIDOS);
       
-      // Filtrar por año
       var librosFiltrados = leidos;
       if (filtroAno !== 'todos') {
         librosFiltrados = leidos.filter(function(libro) {
@@ -1421,7 +1425,6 @@
 
       var html = '<div class="estadisticas-container">';
       
-      // Filtro de años
       var anos = obtenerAniosDisponibles(leidos);
       html += '<div class="filtro-anos">';
       html += '<button class="' + (filtroAno === 'todos' ? 'activo' : '') + '" data-ano="todos">Todos</button>';
@@ -1435,7 +1438,6 @@
       html += '<div class="stat"><div class="numero">' + mediaEstrellas + ' ★</div><div class="label">Media estrellas</div></div>';
       html += '</div>';
 
-      // Citas destacadas
       if (citas.length > 0) {
         html += '<div class="seccion-titulo" style="margin-top:16px;">Citas destacadas</div>';
         citas.forEach(function(cita) {
@@ -1451,7 +1453,6 @@
       html += '</div>';
       estadisticasContainer.innerHTML = html;
 
-      // Event listeners para los botones de filtro
       document.querySelectorAll('.filtro-anos button').forEach(function(btn) {
         btn.addEventListener('click', function() {
           filtroAno = this.getAttribute('data-ano');
@@ -1473,7 +1474,7 @@
           anos.add(anio);
         }
       });
-      return Array.from(anos).sort(function(a, b) { return b - a; }); // Descendente
+      return Array.from(anos).sort(function(a, b) { return b - a; });
     }
 
     function anadirLibro() {
@@ -1537,13 +1538,13 @@
       renderEstadisticas();
     }
 
-    function toggleDirection() {
-      direccionAscendente = !direccionAscendente;
-      ordenDirection.textContent = direccionAscendente ? "Ascendente ↑" : "Descendente ↓";
+    function toggleDirectionLeidos() {
+      direccionAscendenteLeidos = !direccionAscendenteLeidos;
+      ordenDirectionLeidos.textContent = direccionAscendenteLeidos ? "Ascendente ↑" : "Descendente ↓";
       renderLeidos();
     }
 
-    function cambiarOrden() {
+    function cambiarOrdenLeidos() {
       renderLeidos();
     }
 
@@ -1605,8 +1606,9 @@
     tabParaLeer.addEventListener("click", mostrarParaLeer);
     tabLeidos.addEventListener("click", mostrarLeidos);
     tabEstadisticas.addEventListener("click", mostrarEstadisticas);
-    ordenDirection.addEventListener("click", toggleDirection);
-    ordenCampo.addEventListener("change", cambiarOrden);
+    ordenDirectionLeidos.addEventListener("click", toggleDirectionLeidos);
+    ordenCampoLeidos.addEventListener("change", cambiarOrdenLeidos);
+    busquedaLeidos.addEventListener("input", renderLeidos);
     btnExportar.addEventListener("click", exportarDatos);
     btnImportar.addEventListener("click", function() {
       inputArchivo.click();
