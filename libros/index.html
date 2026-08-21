@@ -101,6 +101,23 @@
       color: var(--fondo-tarjeta);
     }
 
+    .selector button .badge {
+      display: inline-block;
+      background-color: var(--texto-suave);
+      color: var(--fondo-tarjeta);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 1px 8px;
+      border-radius: 10px;
+      margin-left: 6px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .selector button.activo .badge {
+      background-color: var(--fondo-tarjeta);
+      color: var(--acento);
+    }
+
     .fila-entrada {
       display: flex;
       gap: 10px;
@@ -710,6 +727,79 @@
         padding: 40px 16px 16px;
       }
     }
+
+    @media (max-width: 540px) {
+      .fila-entrada {
+        flex-wrap: wrap;
+      }
+
+      .fila-entrada input {
+        flex: 1 1 100%;
+      }
+
+      .boton-cuadrado {
+        width: 100%;
+      }
+
+      .libro .fila-principal {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .libro .info {
+        min-width: unset;
+      }
+
+      .libro .acciones {
+        align-items: stretch;
+        padding-top: 4px;
+        border-top: 1px solid var(--borde);
+      }
+
+      .libro .acciones .fila-acciones {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .libro .fecha {
+        justify-content: flex-start;
+      }
+
+      .libro .fecha .editor-fecha {
+        flex-wrap: wrap;
+      }
+
+      .libro .fecha .editor-fecha input[type="date"] {
+        flex: 1;
+        min-width: 100px;
+        max-width: unset;
+      }
+
+      .ordenacion {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .ordenacion select {
+        width: 100%;
+      }
+
+      .respaldo {
+        flex-direction: column;
+      }
+
+      .respaldo button {
+        width: 100%;
+      }
+
+      .estadisticas {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .estadisticas-container .filtro-anos {
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -720,8 +810,12 @@
 
   <main>
     <div class="selector">
-      <button id="tab-para-leer" class="activo" type="button">Para leer</button>
-      <button id="tab-leidos" type="button">Leídos</button>
+      <button id="tab-para-leer" class="activo" type="button">
+        Para leer <span class="badge" id="badge-para-leer">0</span>
+      </button>
+      <button id="tab-leidos" type="button">
+        Leídos <span class="badge" id="badge-leidos">0</span>
+      </button>
       <button id="tab-estadisticas" type="button">Estadísticas</button>
     </div>
 
@@ -833,6 +927,13 @@
         return parseInt(partes[0]);
       }
       return null;
+    }
+
+    function actualizarBadges() {
+      var paraLeer = cargar(CLAVE_PARA_LEER);
+      var leidos = cargar(CLAVE_LEIDOS);
+      document.getElementById('badge-para-leer').textContent = paraLeer.length;
+      document.getElementById('badge-leidos').textContent = leidos.length;
     }
 
     function svgTick() {
@@ -1252,6 +1353,7 @@
         guardar(CLAVE_LEIDOS, leidos);
         renderLeidos();
         renderEstadisticas();
+        actualizarBadges();
       }
     }
 
@@ -1262,6 +1364,7 @@
         guardar(CLAVE_LEIDOS, leidos);
         renderLeidos();
         renderEstadisticas();
+        actualizarBadges();
       }
     }
 
@@ -1311,6 +1414,7 @@
       listaParaLeer.innerHTML = "";
       if (libros.length === 0) {
         listaParaLeer.appendChild(mensajeVacio("Todavía no hay libros en la lista."));
+        actualizarBadges();
         return;
       }
       libros.forEach(function (libro, indice) {
@@ -1340,6 +1444,7 @@
         fila.appendChild(filaPrincipal);
         listaParaLeer.appendChild(fila);
       });
+      actualizarBadges();
     }
 
     function renderLeidos() {
@@ -1358,6 +1463,7 @@
           mensaje = "Todavía no hay libros leídos.";
         }
         listaLeidos.appendChild(mensajeVacio(mensaje));
+        actualizarBadges();
         return;
       }
       
@@ -1391,6 +1497,7 @@
         
         listaLeidos.appendChild(fila);
       });
+      actualizarBadges();
     }
 
     function renderEstadisticas() {
@@ -1464,6 +1571,7 @@
           renderEstadisticas();
         });
       });
+      actualizarBadges();
     }
 
     function obtenerAniosDisponibles(leidos) {
@@ -1491,6 +1599,7 @@
       inputAutor.value = "";
       inputTitulo.focus();
       renderParaLeer();
+      actualizarBadges();
     }
 
     function marcarLeido(indice) {
@@ -1507,6 +1616,7 @@
       renderParaLeer();
       renderLeidos();
       renderEstadisticas();
+      actualizarBadges();
     }
 
     function mostrarParaLeer() {
@@ -1582,6 +1692,7 @@
               renderParaLeer();
               renderLeidos();
               renderEstadisticas();
+              actualizarBadges();
               alert("Datos importados correctamente.");
             }
           } else {
@@ -1618,6 +1729,7 @@
     renderParaLeer();
     renderLeidos();
     renderEstadisticas();
+    actualizarBadges();
   </script>
 </body>
 </html>
