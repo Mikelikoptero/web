@@ -50,10 +50,10 @@
       padding-bottom: 8px;
     }
 
-    /* Widgets grid */
-    .widgets-grid {
+    /* Widgets row - 3 columnas iguales */
+    .widgets-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 16px;
       margin-bottom: 24px;
     }
@@ -65,6 +65,8 @@
       border-radius: 10px;
       padding: 16px 20px;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
     }
 
     .widget:hover {
@@ -83,7 +85,7 @@
 
     /* Widget: Fecha y hora */
     .widget-fecha .fecha {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 500;
       color: var(--texto);
     }
@@ -107,22 +109,87 @@
       margin-top: 2px;
     }
 
+    /* Widget: Clima actual */
+    .widget-clima-actual {
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--texto);
+    }
+
+    .widget-clima-actual .clima-contenido {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .widget-clima-actual .icono-tiempo {
+      font-size: 2.4rem;
+      line-height: 1;
+    }
+
+    .widget-clima-actual .info-tiempo {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .widget-clima-actual .temperatura {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .widget-clima-actual .descripcion {
+      color: var(--texto-suave);
+      font-size: 0.85rem;
+    }
+
+    .widget-clima-actual .ciudad {
+      color: var(--texto-suave);
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .widget-clima-actual .ciudad svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .widget-clima-actual .fuente-clima {
+      font-size: 0.5rem;
+      color: var(--texto-suave);
+      opacity: 0.3;
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    .widget-clima-actual .cargando {
+      color: var(--texto-suave);
+      font-size: 0.9rem;
+    }
+
     /* Widget: Clima extendido */
     .widget-clima-extendido .clima-dias {
       display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding: 4px 0;
+      gap: 8px;
+      flex: 1;
+      align-items: stretch;
     }
 
     .widget-clima-extendido .clima-dias .dia {
       flex: 1;
-      min-width: 60px;
       text-align: center;
       padding: 8px 4px;
       border-radius: 8px;
       background-color: var(--fondo);
       transition: background-color 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .widget-clima-extendido .clima-dias .dia:hover {
@@ -139,7 +206,7 @@
     .widget-clima-extendido .clima-dias .dia .icono {
       font-size: 1.6rem;
       display: block;
-      margin: 4px 0;
+      margin: 2px 0;
     }
 
     .widget-clima-extendido .clima-dias .dia .temp {
@@ -156,122 +223,21 @@
 
     .widget-clima-extendido .cargando {
       color: var(--texto-suave);
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       text-align: center;
       padding: 12px 0;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .widget-clima-extendido .fuente-clima {
-      font-size: 0.55rem;
+      font-size: 0.5rem;
       color: var(--texto-suave);
-      opacity: 0.4;
+      opacity: 0.3;
       text-align: right;
-      margin-top: 6px;
-    }
-
-    /* Widget: Tiempo actual (se mantiene igual) */
-    .tiempo-widget {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      background-color: var(--fondo-tarjeta);
-      border: 1px solid var(--borde);
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      text-decoration: none;
-      color: var(--texto);
-      transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-      cursor: pointer;
-      grid-column: 1 / -1;
-    }
-
-    .tiempo-widget:hover {
-      box-shadow: 0 4px 14px rgba(58, 53, 45, 0.08);
-      transform: translateY(-2px);
-      border-color: var(--acento);
-    }
-
-    .tiempo-widget .icono-tiempo {
-      font-size: 2.4rem;
-      line-height: 1;
-    }
-
-    .tiempo-widget .info-tiempo {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .tiempo-widget .temperatura {
-      font-size: 1.4rem;
-      font-weight: 600;
-    }
-
-    .tiempo-widget .descripcion {
-      color: var(--texto-suave);
-      font-size: 0.9rem;
-    }
-
-    .tiempo-widget .ciudad {
-      color: var(--texto-suave);
-      font-size: 0.8rem;
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .tiempo-widget .ciudad svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .tiempo-widget .fuente {
-      font-size: 0.6rem;
-      color: var(--texto-suave);
-      opacity: 0.5;
-      margin-left: auto;
-      width: 100%;
-      text-align: right;
-    }
-
-    /* Widget: Resumen de libros */
-    .resumen-widget {
-      display: flex;
-      gap: 32px;
-      background-color: var(--fondo-tarjeta);
-      border: 1px solid var(--borde);
-      border-radius: 10px;
-      padding: 16px 24px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      grid-column: 1 / -1;
-    }
-
-    .resumen-widget:hover {
-      border-color: var(--acento);
-      box-shadow: 0 2px 8px rgba(58, 53, 45, 0.06);
-    }
-
-    .resumen-widget .item {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-    }
-
-    .resumen-widget .item .numero {
-      font-size: 1.8rem;
-      font-weight: 600;
-      font-family: "Cormorant Garamond", Georgia, serif;
-      color: var(--acento);
-      line-height: 1.2;
-    }
-
-    .resumen-widget .item .label {
-      font-size: 0.8rem;
-      color: var(--texto-suave);
+      margin-top: 4px;
     }
 
     /* Notas rápidas */
@@ -282,7 +248,6 @@
       padding: 16px 20px;
       margin-bottom: 32px;
       transition: box-shadow 0.2s ease, border-color 0.2s ease;
-      grid-column: 1 / -1;
     }
 
     .notas-widget:hover {
@@ -327,7 +292,7 @@
       color: var(--texto-suave);
     }
 
-    /* Accesos directos (sin cambios) */
+    /* Accesos directos */
     .shortcuts {
       display: flex;
       gap: 10px;
@@ -498,12 +463,22 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 820px) {
+      .widgets-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .widget-clima-actual {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 540px) {
       main {
         padding: 24px 16px 40px;
       }
 
-      .widgets-grid {
+      .widgets-row {
         grid-template-columns: 1fr;
       }
 
@@ -511,25 +486,23 @@
         font-size: 1.8rem;
       }
 
-      .resumen-widget {
-        gap: 16px;
-        padding: 14px 18px;
-      }
-
-      .resumen-widget .item .numero {
-        font-size: 1.4rem;
-      }
-
       .widget-clima-extendido .clima-dias .dia {
-        min-width: 50px;
+        min-width: 44px;
+        padding: 6px 2px;
+      }
+
+      .widget-clima-extendido .clima-dias .dia .nombre-dia {
+        font-size: 0.6rem;
       }
 
       .widget-clima-extendido .clima-dias .dia .icono {
         font-size: 1.3rem;
       }
-    }
 
-    @media (max-width: 540px) {
+      .widget-clima-extendido .clima-dias .dia .temp {
+        font-size: 0.75rem;
+      }
+
       .shortcut {
         flex: 1 1 calc(50% - 10px);
         max-width: none;
@@ -550,43 +523,13 @@
         flex-wrap: wrap;
       }
 
-      .tiempo-widget {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .tiempo-widget .ciudad {
-        margin-left: 0;
-      }
-
-      .tiempo-widget .fuente {
-        text-align: left;
-      }
-
-      .resumen-widget {
-        flex-direction: column;
+      .widget-clima-actual .clima-contenido {
+        flex-wrap: wrap;
         gap: 8px;
       }
 
-      .widget-clima-extendido .clima-dias {
-        gap: 8px;
-      }
-
-      .widget-clima-extendido .clima-dias .dia {
-        min-width: 44px;
-        padding: 6px 2px;
-      }
-
-      .widget-clima-extendido .clima-dias .dia .nombre-dia {
-        font-size: 0.6rem;
-      }
-
-      .widget-clima-extendido .clima-dias .dia .icono {
-        font-size: 1.1rem;
-      }
-
-      .widget-clima-extendido .clima-dias .dia .temp {
-        font-size: 0.75rem;
+      .widget-clima-actual .info-tiempo {
+        flex: 1 1 100%;
       }
     }
   </style>
@@ -595,66 +538,57 @@
   <main>
     <p class="seccion-titulo">Widgets</p>
 
-    <!-- GRID DE WIDGETS -->
-    <div class="widgets-grid">
-      <!-- Widget: Fecha y hora -->
+    <!-- TRES WIDGETS EN HORIZONTAL -->
+    <div class="widgets-row">
+      <!-- Widget 1: Fecha y hora (euskera) -->
       <div class="widget widget-fecha">
-        <div class="widget-titulo">Fecha y hora</div>
-        <div class="fecha" id="fecha-texto">Cargando...</div>
+        <div class="widget-titulo">Data eta ordua</div>
+        <div class="fecha" id="fecha-texto">Kargatzen...</div>
         <div class="hora" id="hora-texto">--:--:--</div>
         <div class="dia-semana" id="dia-semana-texto"></div>
       </div>
 
-      <!-- Widget: Clima extendido -->
-      <div class="widget widget-clima-extendido">
-        <div class="widget-titulo">Pronóstico 3 días</div>
-        <div class="clima-dias" id="clima-dias">
-          <div class="cargando">Cargando pronóstico...</div>
+      <!-- Widget 2: Clima actual -->
+      <a class="widget widget-clima-actual" id="tiempo-widget" href="https://www.euskalmet.euskadi.eus/eguraldia/hernani/" target="_blank" rel="noopener noreferrer">
+        <div class="widget-titulo">Eguraldia orain</div>
+        <div class="clima-contenido">
+          <div class="icono-tiempo" id="icono-tiempo">⏳</div>
+          <div class="info-tiempo">
+            <div class="temperatura" id="temperatura">--°C</div>
+            <div class="descripcion" id="descripcion">Kargatzen...</div>
+            <div class="ciudad" id="ciudad">
+              Hernani
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </div>
+          </div>
         </div>
         <div class="fuente-clima">Euskalmet</div>
-      </div>
-    </div>
+      </a>
 
-    <!-- Widget: Tiempo actual (ocupa toda la fila) -->
-    <a class="tiempo-widget" id="tiempo-widget" href="https://www.euskalmet.euskadi.eus/eguraldia/hernani/" target="_blank" rel="noopener noreferrer">
-      <div class="icono-tiempo" id="icono-tiempo">⏳</div>
-      <div class="info-tiempo">
-        <div class="temperatura" id="temperatura">--°C</div>
-        <div class="descripcion" id="descripcion">Kargatzen...</div>
-      </div>
-      <div class="ciudad" id="ciudad">
-        Hernani
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-          <polyline points="15 3 21 3 21 9"/>
-          <line x1="10" y1="14" x2="21" y2="3"/>
-        </svg>
-      </div>
-      <div class="fuente">Euskalmet</div>
-    </a>
-
-    <!-- Widget: Resumen de libros -->
-    <div class="resumen-widget">
-      <div class="item">
-        <span class="numero" id="total-libros">0</span>
-        <span class="label">libros leídos</span>
-      </div>
-      <div class="item">
-        <span class="numero" id="total-pendientes">0</span>
-        <span class="label">pendientes</span>
+      <!-- Widget 3: Clima extendido 3 días -->
+      <div class="widget widget-clima-extendido">
+        <div class="widget-titulo">3 eguneko iragarpena</div>
+        <div class="clima-dias" id="clima-dias">
+          <div class="cargando">Kargatzen...</div>
+        </div>
+        <div class="fuente-clima">Euskalmet</div>
       </div>
     </div>
 
     <!-- Notas rápidas -->
     <div class="notas-widget">
       <div class="info-notas">
-        <span>Notas rápidas</span>
-        <span id="contador-notas">0 caracteres</span>
+        <span>Ohar azkarrak</span>
+        <span id="contador-notas">0 karaktere</span>
       </div>
-      <textarea id="notas-textarea" placeholder="Escribe aquí tus notas rápidas..."></textarea>
+      <textarea id="notas-textarea" placeholder="Idatzi zure ohar azkarrak hemen..."></textarea>
     </div>
 
-    <p class="seccion-titulo">Accesos directos</p>
+    <p class="seccion-titulo">Accesso directos</p>
 
     <div class="shortcuts fila">
       <a class="shortcut" href="https://mail.google.com" target="_blank" rel="noopener noreferrer">
@@ -734,61 +668,56 @@
       </div>
     </div>
 
-    <p class="seccion-titulo">Páginas</p>
+    <p class="seccion-titulo">Orriak</p>
 
     <div class="tarjeta">
-      <h2>Lista de libros</h2>
-      <a class="boton" href="./libros/">Abrir</a>
+      <h2>Liburu zerrenda</h2>
+      <a class="boton" href="./libros/">Ireki</a>
     </div>
 
     <div class="tarjeta">
       <h2>Akademia</h2>
-      <a class="boton" href="./akademia/">Abrir</a>
+      <a class="boton" href="./akademia/">Ireki</a>
     </div>
 
     <div class="tarjeta">
-      <h2>Rutinas</h2>
-      <a class="boton" href="./rutinas/">Abrir</a>
+      <h2>Errutinak</h2>
+      <a class="boton" href="./rutinas/">Ireki</a>
     </div>
   </main>
 
   <footer>
-    <p>Web personal</p>
+    <p>Web pertsonala</p>
   </footer>
 
   <script>
-    // ===== FECHA Y HORA =====
+    // ===== FECHA Y HORA (en euskera) =====
     function actualizarFechaHora() {
       var ahora = new Date();
       
-      // Formatear fecha
       var opcionesFecha = { 
         weekday: 'long', 
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
       };
-      var fechaFormateada = ahora.toLocaleDateString('es-ES', opcionesFecha);
+      var fechaFormateada = ahora.toLocaleDateString('eu-ES', opcionesFecha);
       document.getElementById('fecha-texto').textContent = fechaFormateada;
       
-      // Formatear hora
       var horas = String(ahora.getHours()).padStart(2, '0');
       var minutos = String(ahora.getMinutes()).padStart(2, '0');
       var segundos = String(ahora.getSeconds()).padStart(2, '0');
       document.getElementById('hora-texto').innerHTML = horas + ':' + minutos + ':<span class="segundos">' + segundos + '</span>';
       
-      // Día de la semana (capitalizado)
-      var dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      var dias = ['Igandea', 'Astelehena', 'Asteartea', 'Asteazkena', 'Osteguna', 'Ostirala', 'Larunbata'];
       document.getElementById('dia-semana-texto').textContent = dias[ahora.getDay()];
     }
 
-    // Actualizar cada segundo
     actualizarFechaHora();
     setInterval(actualizarFechaHora, 1000);
 
-    // ===== CLIMA EXTENDIDO (Euskalmet) =====
+    // ===== CLIMA EXTENDIDO =====
     function obtenerClimaExtendido() {
-      // Usamos la API de Euskalmet para Hernani (código: 2003)
       var url = 'https://www.euskalmet.euskadi.eus/api/estado/2003';
       
       fetch(url)
@@ -799,14 +728,9 @@
         .then(function(data) {
           if (data && data.properties) {
             var tempActual = data.properties.temperatura || '--';
-            var iconoActual = data.properties.ikonoa || '';
             var descripcion = data.properties.eguraldia || '';
-            
-            // Para el extendido, usamos los datos de la API que incluyen
-            // pronóstico. Si no está disponible, generamos datos de ejemplo.
             var dias = [];
             
-            // Intentar obtener pronóstico de la API si está disponible
             if (data.properties.pronostico && data.properties.pronostico.length > 0) {
               var pronostico = data.properties.pronostico;
               for (var i = 0; i < Math.min(3, pronostico.length); i++) {
@@ -819,16 +743,13 @@
                 });
               }
             } else {
-              // Fallback: usar los datos actuales para generar el pronóstico
               var hoy = new Date();
-              var nombresDias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-              
-              // Generar 3 días a partir de la temperatura actual
+              var nombresDias = ['Ig', 'Al', 'Ar', 'Az', 'Og', 'Or', 'La'];
               var temp = parseInt(tempActual) || 15;
               for (var i = 0; i < 3; i++) {
                 var fecha = new Date(hoy);
                 fecha.setDate(hoy.getDate() + i + 1);
-                var variacion = Math.floor(Math.random() * 6) - 3; // -3 a +3 grados
+                var variacion = Math.floor(Math.random() * 6) - 3;
                 var tempDia = temp + variacion + i;
                 dias.push({
                   dia: nombresDias[fecha.getDay()],
@@ -846,7 +767,6 @@
         })
         .catch(function(error) {
           console.error('Error con Euskalmet:', error);
-          // Fallback: generar datos de ejemplo
           generarClimaFallback();
         });
     }
@@ -885,7 +805,7 @@
 
     function generarClimaFallback() {
       var hoy = new Date();
-      var nombresDias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      var nombresDias = ['Ig', 'Al', 'Ar', 'Az', 'Og', 'Or', 'La'];
       var iconos = ['☀️', '⛅', '☁️', '🌧️', '🌤️', '☀️', '⛅'];
       var dias = [];
       
@@ -905,7 +825,6 @@
     }
 
     function obtenerIconoPorDescripcion(descripcion, offset) {
-      // Para generar iconos variados según la descripción
       var desc = (descripcion || '').toLowerCase();
       var iconos = ['☀️', '⛅', '☁️', '🌧️', '🌤️', '☀️', '⛅'];
       
@@ -918,7 +837,6 @@
       return iconos[(2 + offset) % iconos.length];
     }
 
-    // Cargar clima extendido
     obtenerClimaExtendido();
 
     // ===== NOTAS RÁPIDAS =====
@@ -943,34 +861,13 @@
 
     function actualizarContador() {
       var caracteres = textareaNotas.value.length;
-      contadorNotas.textContent = caracteres + ' caracteres';
+      contadorNotas.textContent = caracteres + ' karaktere';
     }
 
     textareaNotas.addEventListener('input', guardarNotas);
     cargarNotas();
 
-    // ===== CONTADOR DE LIBROS =====
-    function actualizarContadorPrincipal() {
-      try {
-        var leidos = JSON.parse(localStorage.getItem('librosLeidos')) || [];
-        var paraLeer = JSON.parse(localStorage.getItem('librosParaLeer')) || [];
-        document.getElementById('total-libros').textContent = leidos.length;
-        document.getElementById('total-pendientes').textContent = paraLeer.length;
-      } catch (e) {
-        document.getElementById('total-libros').textContent = '0';
-        document.getElementById('total-pendientes').textContent = '0';
-      }
-    }
-
-    actualizarContadorPrincipal();
-    window.addEventListener('storage', function(e) {
-      if (e.key === 'librosLeidos' || e.key === 'librosParaLeer') {
-        actualizarContadorPrincipal();
-      }
-    });
-    setInterval(actualizarContadorPrincipal, 5000);
-
-    // ===== WIDGET DEL TIEMPO ACTUAL =====
+    // ===== WIDGET CLIMA ACTUAL =====
     function obtenerTiempoEuskalmet() {
       var url = 'https://www.euskalmet.euskadi.eus/api/estado/2003';
       
@@ -1019,7 +916,7 @@
     }
 
     function actualizarWidgetEuskalmet(temp, icono, descripcion) {
-      document.getElementById('icono-tiempo').textContent = icono || obtenerIconoPorDescripcion(descripcion);
+      document.getElementById('icono-tiempo').textContent = icono || obtenerIconoPorDescripcion(descripcion, 0);
       document.getElementById('temperatura').textContent = temp + '°C';
       document.getElementById('descripcion').textContent = descripcion || '--';
       document.getElementById('ciudad').innerHTML = 'Hernani <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
