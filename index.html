@@ -116,6 +116,43 @@
       text-align: right;
     }
 
+    /* Widget de resumen de libros */
+    .resumen-widget {
+      display: flex;
+      gap: 32px;
+      background-color: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .resumen-widget:hover {
+      border-color: var(--acento);
+      box-shadow: 0 2px 8px rgba(58, 53, 45, 0.06);
+    }
+
+    .resumen-widget .item {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .resumen-widget .item .numero {
+      font-size: 1.8rem;
+      font-weight: 600;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      color: var(--acento);
+      line-height: 1.2;
+    }
+
+    .resumen-widget .item .label {
+      font-size: 0.8rem;
+      color: var(--texto-suave);
+    }
+
     /* Notas rápidas */
     .notas-widget {
       background-color: var(--fondo-tarjeta);
@@ -343,6 +380,15 @@
       main {
         padding: 24px 16px 40px;
       }
+
+      .resumen-widget {
+        gap: 16px;
+        padding: 14px 18px;
+      }
+
+      .resumen-widget .item .numero {
+        font-size: 1.4rem;
+      }
     }
 
     @media (max-width: 540px) {
@@ -378,6 +424,11 @@
       .tiempo-widget .fuente {
         text-align: left;
       }
+
+      .resumen-widget {
+        flex-direction: column;
+        gap: 8px;
+      }
     }
   </style>
 </head>
@@ -385,6 +436,7 @@
   <main>
     <p class="seccion-titulo">Widgets</p>
 
+    <!-- Widget del tiempo -->
     <a class="tiempo-widget" id="tiempo-widget" href="https://www.euskalmet.euskadi.eus/eguraldia/hernani/" target="_blank" rel="noopener noreferrer">
       <div class="icono-tiempo" id="icono-tiempo">⏳</div>
       <div class="info-tiempo">
@@ -402,6 +454,19 @@
       <div class="fuente">Euskalmet</div>
     </a>
 
+    <!-- Widget de resumen de libros -->
+    <div class="resumen-widget">
+      <div class="item">
+        <span class="numero" id="total-libros">0</span>
+        <span class="label">libros leídos</span>
+      </div>
+      <div class="item">
+        <span class="numero" id="total-pendientes">0</span>
+        <span class="label">pendientes</span>
+      </div>
+    </div>
+
+    <!-- Notas rápidas -->
     <div class="notas-widget">
       <div class="info-notas">
         <span>Notas rápidas</span>
@@ -540,6 +605,32 @@
 
     textareaNotas.addEventListener('input', guardarNotas);
     cargarNotas();
+
+    // ===== CONTADOR DE LIBROS =====
+    function actualizarContadorPrincipal() {
+      try {
+        var leidos = JSON.parse(localStorage.getItem('librosLeidos')) || [];
+        var paraLeer = JSON.parse(localStorage.getItem('librosParaLeer')) || [];
+        document.getElementById('total-libros').textContent = leidos.length;
+        document.getElementById('total-pendientes').textContent = paraLeer.length;
+      } catch (e) {
+        document.getElementById('total-libros').textContent = '0';
+        document.getElementById('total-pendientes').textContent = '0';
+      }
+    }
+
+    // Ejecutar al cargar la página
+    actualizarContadorPrincipal();
+
+    // Escuchar cambios en localStorage (cuando se modifican desde otra pestaña)
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'librosLeidos' || e.key === 'librosParaLeer') {
+        actualizarContadorPrincipal();
+      }
+    });
+
+    // Actualizar cada 5 segundos por si acaso
+    setInterval(actualizarContadorPrincipal, 5000);
 
     // ===== WIDGET DEL TIEMPO =====
     function obtenerTiempoEuskalmet() {
