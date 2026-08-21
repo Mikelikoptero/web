@@ -687,10 +687,6 @@
       <a class="boton" href="./akademia/">Ireki</a>
     </div>
 
-    <div class="tarjeta">
-      <h2>Errutinak</h2>
-      <a class="boton" href="./rutinas/">Ireki</a>
-    </div>
   </main>
 
   <footer>
@@ -702,15 +698,6 @@
     function actualizarFechaHora() {
       var ahora = new Date();
       
-      // Forzar formato en euskera
-      var opcionesFecha = { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      };
-      
-      // Usamos un mapping manual para asegurar euskera
       var mesesEus = ['urtarrila', 'otsaila', 'martxoa', 'apirila', 'maiatza', 'ekaina', 'uztaila', 'abuztua', 'iraila', 'urria', 'azaroa', 'abendua'];
       var diasEus = ['igandea', 'astelehena', 'asteartea', 'asteazkena', 'osteguna', 'ostirala', 'larunbata'];
       
@@ -721,7 +708,6 @@
       
       document.getElementById('fecha-texto').textContent = diaSemana + ', ' + dia + ' ' + mes + ' ' + año;
       
-      // Formatear hora
       var horas = String(ahora.getHours()).padStart(2, '0');
       var minutos = String(ahora.getMinutes()).padStart(2, '0');
       var segundos = String(ahora.getSeconds()).padStart(2, '0');
@@ -900,7 +886,6 @@
             var descripcion = data.properties.eguraldia || '';
             var humedad = data.properties.hezetasuna || '--';
             
-            // Traducir descripción a euskera si es necesario
             var descEus = traducirDescripcion(descripcion);
             
             actualizarWidgetEuskalmet(temp, icono, descEus, humedad);
@@ -915,17 +900,15 @@
     }
 
     function traducirDescripcion(texto) {
-      // Si ya está en euskera, lo dejamos
       var palabrasEus = ['eguzki', 'hodei', 'euri', 'zaparrada', 'laino', 'lanbro', 'haize', 'elur', 'ekaitz', 'garbi', 'partzial'];
       var textoLower = texto.toLowerCase();
       
       for (var i = 0; i < palabrasEus.length; i++) {
         if (textoLower.includes(palabrasEus[i])) {
-          return texto; // Ya está en euskera
+          return texto;
         }
       }
       
-      // Traducciones básicas
       var traducciones = {
         'sunny': 'Eguzkitsua',
         'clear': 'Garbi',
@@ -949,7 +932,6 @@
         }
       }
       
-      // Si no se encuentra, devolvemos el texto original
       return texto;
     }
 
