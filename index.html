@@ -145,6 +145,12 @@
       font-size: 0.85rem;
     }
 
+    .widget-clima-actual .humedad {
+      color: var(--texto-suave);
+      font-size: 0.7rem;
+      margin-top: 1px;
+    }
+
     .widget-clima-actual .ciudad {
       color: var(--texto-suave);
       font-size: 0.75rem;
@@ -556,6 +562,7 @@
           <div class="info-tiempo">
             <div class="temperatura" id="temperatura">--°C</div>
             <div class="descripcion" id="descripcion">Kargatzen...</div>
+            <div class="humedad" id="humedad">Hezetasuna: --%</div>
             <div class="ciudad" id="ciudad">
               Hernani
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -691,26 +698,36 @@
   </footer>
 
   <script>
-    // ===== FECHA Y HORA (en euskera) =====
+    // ===== FECHA Y HORA (en euskera, forzado) =====
     function actualizarFechaHora() {
       var ahora = new Date();
       
+      // Forzar formato en euskera
       var opcionesFecha = { 
         weekday: 'long', 
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
       };
-      var fechaFormateada = ahora.toLocaleDateString('eu-ES', opcionesFecha);
-      document.getElementById('fecha-texto').textContent = fechaFormateada;
       
+      // Usamos un mapping manual para asegurar euskera
+      var mesesEus = ['urtarrila', 'otsaila', 'martxoa', 'apirila', 'maiatza', 'ekaina', 'uztaila', 'abuztua', 'iraila', 'urria', 'azaroa', 'abendua'];
+      var diasEus = ['igandea', 'astelehena', 'asteartea', 'asteazkena', 'osteguna', 'ostirala', 'larunbata'];
+      
+      var diaSemana = diasEus[ahora.getDay()];
+      var dia = ahora.getDate();
+      var mes = mesesEus[ahora.getMonth()];
+      var año = ahora.getFullYear();
+      
+      document.getElementById('fecha-texto').textContent = diaSemana + ', ' + dia + ' ' + mes + ' ' + año;
+      
+      // Formatear hora
       var horas = String(ahora.getHours()).padStart(2, '0');
       var minutos = String(ahora.getMinutes()).padStart(2, '0');
       var segundos = String(ahora.getSeconds()).padStart(2, '0');
       document.getElementById('hora-texto').innerHTML = horas + ':' + minutos + ':<span class="segundos">' + segundos + '</span>';
       
-      var dias = ['Igandea', 'Astelehena', 'Asteartea', 'Asteazkena', 'Osteguna', 'Ostirala', 'Larunbata'];
-      document.getElementById('dia-semana-texto').textContent = dias[ahora.getDay()];
+      document.getElementById('dia-semana-texto').textContent = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);
     }
 
     actualizarFechaHora();
@@ -828,11 +845,11 @@
       var desc = (descripcion || '').toLowerCase();
       var iconos = ['☀️', '⛅', '☁️', '🌧️', '🌤️', '☀️', '⛅'];
       
-      if (desc.includes('eguzki') || desc.includes('argi')) return iconos[(0 + offset) % iconos.length];
+      if (desc.includes('eguzki') || desc.includes('argi') || desc.includes('garbi')) return iconos[(0 + offset) % iconos.length];
       if (desc.includes('hodei') && desc.includes('partzial')) return iconos[(1 + offset) % iconos.length];
       if (desc.includes('hodei')) return iconos[(2 + offset) % iconos.length];
-      if (desc.includes('euri')) return iconos[(3 + offset) % iconos.length];
-      if (desc.includes('laino')) return iconos[(4 + offset) % iconos.length];
+      if (desc.includes('euri') || desc.includes('zaparrada')) return iconos[(3 + offset) % iconos.length];
+      if (desc.includes('laino') || desc.includes('lanbro')) return iconos[(4 + offset) % iconos.length];
       
       return iconos[(2 + offset) % iconos.length];
     }
@@ -881,7 +898,12 @@
             var temp = data.properties.temperatura || '--';
             var icono = data.properties.ikonoa || '';
             var descripcion = data.properties.eguraldia || '';
-            actualizarWidgetEuskalmet(temp, icono, descripcion);
+            var humedad = data.properties.hezetasuna || '--';
+            
+            // Traducir descripción a euskera si es necesario
+            var descEus = traducirDescripcion(descripcion);
+            
+            actualizarWidgetEuskalmet(temp, icono, descEus, humedad);
           } else {
             obtenerTiempoWTTR();
           }
@@ -890,6 +912,45 @@
           console.error('Error con Euskalmet:', error);
           obtenerTiempoWTTR();
         });
+    }
+
+    function traducirDescripcion(texto) {
+      // Si ya está en euskera, lo dejamos
+      var palabrasEus = ['eguzki', 'hodei', 'euri', 'zaparrada', 'laino', 'lanbro', 'haize', 'elur', 'ekaitz', 'garbi', 'partzial'];
+      var textoLower = texto.toLowerCase();
+      
+      for (var i = 0; i < palabrasEus.length; i++) {
+        if (textoLower.includes(palabrasEus[i])) {
+          return texto; // Ya está en euskera
+        }
+      }
+      
+      // Traducciones básicas
+      var traducciones = {
+        'sunny': 'Eguzkitsua',
+        'clear': 'Garbi',
+        'partly cloudy': 'Hodei partzialak',
+        'cloudy': 'Hodeitsua',
+        'overcast': 'Hodei trinkoak',
+        'rain': 'Euritsua',
+        'heavy rain': 'Eurite handia',
+        'shower': 'Zaparrada',
+        'thunderstorm': 'Ekaitza',
+        'snow': 'Elurra',
+        'fog': 'Lainoa',
+        'mist': 'Lanbroa',
+        'windy': 'Haizetsua',
+        'drizzle': 'Euria'
+      };
+      
+      for (var clave in traducciones) {
+        if (textoLower.includes(clave)) {
+          return traducciones[clave];
+        }
+      }
+      
+      // Si no se encuentra, devolvemos el texto original
+      return texto;
     }
 
     function obtenerTiempoWTTR() {
@@ -905,40 +966,46 @@
           var descripcion = current.lang_es ? current.lang_es[0].value : current.weatherDesc[0].value;
           var temperatura = current.temp_C;
           var localidad = data.nearest_area[0].areaName[0].value;
-          actualizarWidgetConDatos(descripcion, temperatura, localidad);
+          var humedad = current.humidity || '--';
+          
+          var descEus = traducirDescripcion(descripcion);
+          actualizarWidgetConDatos(descEus, temperatura, localidad, humedad);
         })
         .catch(function(error) {
           console.error('Error al obtener el tiempo:', error);
           document.getElementById('icono-tiempo').textContent = '❓';
-          document.getElementById('descripcion').textContent = 'No disponible';
+          document.getElementById('descripcion').textContent = 'Ez dago eskuragarri';
           document.getElementById('temperatura').textContent = '--°C';
+          document.getElementById('humedad').textContent = 'Hezetasuna: --%';
         });
     }
 
-    function actualizarWidgetEuskalmet(temp, icono, descripcion) {
+    function actualizarWidgetEuskalmet(temp, icono, descripcion, humedad) {
       document.getElementById('icono-tiempo').textContent = icono || obtenerIconoPorDescripcion(descripcion, 0);
       document.getElementById('temperatura').textContent = temp + '°C';
       document.getElementById('descripcion').textContent = descripcion || '--';
+      document.getElementById('humedad').textContent = 'Hezetasuna: ' + humedad + '%';
       document.getElementById('ciudad').innerHTML = 'Hernani <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
     }
 
-    function actualizarWidgetConDatos(descripcion, temperatura, localidad) {
+    function actualizarWidgetConDatos(descripcion, temperatura, localidad, humedad) {
       document.getElementById('icono-tiempo').textContent = obtenerIcono(descripcion);
       document.getElementById('temperatura').textContent = temperatura + '°C';
       document.getElementById('descripcion').textContent = descripcion;
+      document.getElementById('humedad').textContent = 'Hezetasuna: ' + humedad + '%';
       document.getElementById('ciudad').innerHTML = localidad + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
     }
 
     function obtenerIcono(descripcion) {
       var desc = descripcion.toLowerCase();
-      if (desc.includes('soleado') || desc.includes('despejado') || desc.includes('sunny')) return '☀️';
-      if (desc.includes('parcialmente nublado') || desc.includes('nubes dispersas')) return '⛅';
-      if (desc.includes('nublado') || desc.includes('cloudy') || desc.includes('overcast')) return '☁️';
-      if (desc.includes('lluvia') || desc.includes('rain') || desc.includes('chubascos')) return '🌧️';
-      if (desc.includes('tormenta') || desc.includes('thunder') || desc.includes('storm')) return '⛈️';
-      if (desc.includes('nieve') || desc.includes('snow')) return '❄️';
-      if (desc.includes('niebla') || desc.includes('fog') || desc.includes('mist')) return '🌫️';
-      if (desc.includes('viento') || desc.includes('windy')) return '💨';
+      if (desc.includes('eguzki') || desc.includes('garbi')) return '☀️';
+      if (desc.includes('hodei partzial')) return '⛅';
+      if (desc.includes('hodei') || desc.includes('hodeitsua')) return '☁️';
+      if (desc.includes('euri') || desc.includes('zaparrada') || desc.includes('euritsua')) return '🌧️';
+      if (desc.includes('ekaitz')) return '⛈️';
+      if (desc.includes('elur')) return '❄️';
+      if (desc.includes('laino') || desc.includes('lanbro')) return '🌫️';
+      if (desc.includes('haize')) return '💨';
       return '🌤️';
     }
 
