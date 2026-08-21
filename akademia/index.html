@@ -118,9 +118,114 @@
       flex-shrink: 0;
     }
 
+    /* Menú desplegable de PDFs */
+    .menu-pdfs {
+      margin-bottom: 32px;
+    }
+
+    .menu-pdfs .boton-pdfs {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      background-color: var(--fondo-tarjeta);
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .menu-pdfs .boton-pdfs:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+      transform: translateY(-1px);
+    }
+
+    .menu-pdfs .boton-pdfs svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-pdfs .boton-pdfs.abierto svg {
+      transform: rotate(180deg);
+    }
+
+    .menu-pdfs .contenido-pdfs {
+      display: none;
+      margin-top: 12px;
+      padding: 16px 20px;
+      background-color: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .menu-pdfs .contenido-pdfs.abierto {
+      display: block;
+    }
+
+    .menu-pdfs .contenido-pdfs .pdf-grupo {
+      margin-bottom: 12px;
+    }
+
+    .menu-pdfs .contenido-pdfs .pdf-grupo:last-child {
+      margin-bottom: 0;
+    }
+
+    .menu-pdfs .contenido-pdfs .pdf-grupo .grupo-nombre {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--texto);
+      margin-bottom: 4px;
+      padding-bottom: 2px;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .menu-pdfs .contenido-pdfs .pdf-grupo .pdf-links {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .menu-pdfs .contenido-pdfs .pdf-grupo .pdf-links a {
+      color: var(--texto-suave);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .menu-pdfs .contenido-pdfs .pdf-grupo .pdf-links a:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      transform: translateX(3px);
+    }
+
+    .menu-pdfs .contenido-pdfs .pdf-grupo .pdf-links a .pdf-icon {
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .menu-pdfs .contenido-pdfs .vacio {
+      color: var(--texto-suave);
+      font-size: 0.8rem;
+      opacity: 0.5;
+      font-style: italic;
+    }
+
+    /* Asignaturas */
     .asignaturas-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px;
       margin-bottom: 32px;
     }
@@ -174,14 +279,6 @@
     .asignatura .enlaces a .pdf-icon {
       font-size: 0.8rem;
       flex-shrink: 0;
-    }
-
-    .asignatura .enlaces .subrayado {
-      font-size: 0.7rem;
-      color: var(--texto-suave);
-      opacity: 0.4;
-      font-style: italic;
-      padding-left: 6px;
     }
 
     .asignatura .enlaces .vacio {
@@ -422,92 +519,105 @@
       </a>
     </div>
 
+    <!-- MENÚ PDFs -->
+    <div class="menu-pdfs">
+      <button class="boton-pdfs" id="boton-pdfs" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+        PDFak
+      </button>
+      <div class="contenido-pdfs" id="contenido-pdfs">
+        <!-- Matematika -->
+        <div class="pdf-grupo">
+          <div class="grupo-nombre">Matematika</div>
+          <div class="pdf-links">
+            <a href="recursos/matematika/1Ebal2324Kontrol.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> 1. Ebaluazioa - 23/24 Kontrola
+            </a>
+            <a href="recursos/matematika/2Ebal2223.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> 2. Ebaluazioa - 22/23
+            </a>
+            <a href="recursos/matematika/2Ebal2223Reku.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> 2. Ebaluazioa - 22/23 (Errekuperazioa)
+            </a>
+            <a href="recursos/matematika/2Ebal2324.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> 2. Ebaluazioa - 23/24
+            </a>
+            <a href="recursos/matematika/3Ebal2223Funtzioak.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> 3. Ebaluazioa - 22/23 (Funtzioak)
+            </a>
+            <a href="recursos/matematika/3Ebal2223Trigonometria.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> 3. Ebaluazioa - 22/23 (Trigonometria)
+            </a>
+            <a href="recursos/matematika/3Ebal2526Trigonometria.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> 3. Ebaluazioa - 25/26 (Trigonometria)
+            </a>
+            <a href="recursos/matematika/EkuazioEtaSistemak2526AzterketaAxular.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> Ekuazioak eta Sistemak - 25/26 (Axular)
+            </a>
+            <a href="recursos/matematika/EkuazioSistema2526AriketaJasoa.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> Ekuazioak eta Sistemak - 25/26 (Ariketa jasoa)
+            </a>
+          </div>
+        </div>
+
+        <!-- Fisika / Kimika -->
+        <div class="pdf-grupo">
+          <div class="grupo-nombre">Fisika / Kimika</div>
+          <div class="pdf-links">
+            <a href="recursos/fisika/1Ebal2324.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> 1. Ebaluazioa - 23/24
+            </a>
+            <a href="recursos/fisika/2Ebal2324Kontrola.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> 2. Ebaluazioa - 23/24 (Kontrola)
+            </a>
+            <a href="recursos/fisika/3Ebal2324.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> 3. Ebaluazioa - 23/24
+            </a>
+            <a href="recursos/fisika/Formulazioa.pdf" target="_blank">
+              <span class="pdf-icon">📄</span> Formulazioa
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <p class="seccion-titulo">Gaiak</p>
 
     <div class="asignaturas-grid">
-      <!-- MATEMATIKA -->
       <div class="asignatura">
         <div class="nombre">Matematika</div>
         <div class="enlaces">
           <a href="https://www.desmos.com/calculator?lang=es" target="_blank" rel="noopener noreferrer">Desmos</a>
-
-          <!-- PDFs -->
-          <a href="recursos/matematika/1Ebal2324Kontrol.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> 1. Ebaluazioa - 23/24 Kontrola
-          </a>
-          <a href="recursos/matematika/2Ebal2223.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> 2. Ebaluazioa - 22/23
-          </a>
-          <a href="recursos/matematika/2Ebal2223Reku.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> 2. Ebaluazioa - 22/23 (Errekuperazioa)
-          </a>
-          <a href="recursos/matematika/2Ebal2324.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> 2. Ebaluazioa - 23/24
-          </a>
-          <a href="recursos/matematika/3Ebal2223Funtzioak.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> 3. Ebaluazioa - 22/23 (Funtzioak)
-          </a>
-          <a href="recursos/matematika/3Ebal2223Trigonometria.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> 3. Ebaluazioa - 22/23 (Trigonometria)
-          </a>
-          <a href="recursos/matematika/3Ebal2526Trigonometria.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> 3. Ebaluazioa - 25/26 (Trigonometria)
-          </a>
-          <a href="recursos/matematika/EkuazioEtaSistemak2526AzterketaAxular.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> Ekuazioak eta Sistemak - 25/26 (Axular)
-          </a>
-          <a href="recursos/matematika/EkuazioSistema2526AriketaJasoa.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> Ekuazioak eta Sistemak - 25/26 (Ariketa jasoa)
-          </a>
         </div>
       </div>
 
-      <!-- FISIKA / KIMIKA -->
       <div class="asignatura">
         <div class="nombre">Fisika / Kimika</div>
         <div class="enlaces">
           <a href="https://onddiakademia.github.io/TaulaPeriodiko/" target="_blank" rel="noopener noreferrer">Taula Periodikoa</a>
-
-          <!-- PDFs -->
-          <a href="recursos/fisika/1Ebal2324.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> 1. Ebaluazioa - 23/24
-          </a>
-          <a href="recursos/fisika/2Ebal2324Kontrola.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> 2. Ebaluazioa - 23/24 (Kontrola)
-          </a>
-          <a href="recursos/fisika/3Ebal2324.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> 3. Ebaluazioa - 23/24
-          </a>
-          <a href="recursos/fisika/Formulazioa.pdf" target="_blank">
-            <span class="pdf-icon">📄</span> Formulazioa
-          </a>
         </div>
       </div>
 
-      <!-- GAZTE -->
       <div class="asignatura">
         <div class="nombre">Gazte</div>
         <div class="enlaces">
           <a href="https://sintaxis.org/analizador/" target="_blank" rel="noopener noreferrer">Sintaxis</a>
-          <span class="vacio">Oraindik ez dago PDFrik</span>
         </div>
       </div>
 
-      <!-- EUSKARA -->
       <div class="asignatura">
         <div class="nombre">Euskara</div>
         <div class="enlaces">
           <span class="vacio">Oraindik ez dago estekarik</span>
-          <span class="vacio">Oraindik ez dago PDFrik</span>
         </div>
       </div>
 
-      <!-- INGELESA -->
       <div class="asignatura">
         <div class="nombre">Ingelesa</div>
         <div class="enlaces">
           <span class="vacio">Oraindik ez dago estekarik</span>
-          <span class="vacio">Oraindik ez dago PDFrik</span>
         </div>
       </div>
     </div>
@@ -552,6 +662,35 @@
   </footer>
 
   <script>
+    // ===== MENÚ PDFs =====
+    var botonPdfs = document.getElementById('boton-pdfs');
+    var contenidoPdfs = document.getElementById('contenido-pdfs');
+    var pdfsAbierto = false;
+
+    botonPdfs.addEventListener('click', function() {
+      pdfsAbierto = !pdfsAbierto;
+      if (pdfsAbierto) {
+        contenidoPdfs.classList.add('abierto');
+        botonPdfs.classList.add('abierto');
+        botonPdfs.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+          Ezkutatu PDFak
+        `;
+      } else {
+        contenidoPdfs.classList.remove('abierto');
+        botonPdfs.classList.remove('abierto');
+        botonPdfs.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+          PDFak
+        `;
+      }
+    });
+
+    // ===== HORARIO =====
     var CLAVE_HORARIO = "horarioAkademia";
     var horas = ['16:00', '17:00', '18:00', '19:00'];
     var dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
