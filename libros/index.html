@@ -482,15 +482,50 @@
     }
 
     /* Estadísticas */
+    .estadisticas-container {
+      margin-bottom: 24px;
+    }
+
+    .estadisticas-container .filtro-anos {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .estadisticas-container .filtro-anos button {
+      padding: 4px 12px;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      background-color: transparent;
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .estadisticas-container .filtro-anos button:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .estadisticas-container .filtro-anos button.activo {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
     .estadisticas {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 12px;
-      margin-bottom: 24px;
       padding: 16px;
       background-color: var(--fondo-tarjeta);
       border: 1px solid var(--borde);
       border-radius: 10px;
+      margin-bottom: 16px;
     }
 
     .estadisticas .stat {
@@ -685,6 +720,10 @@
       .estadisticas {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      .estadisticas-container .filtro-anos {
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -766,6 +805,7 @@
     var ordenDirection = document.getElementById("orden-direction");
 
     var direccionAscendente = false;
+    var filtroAno = 'todos';
 
     function cargar(clave) {
       try {
@@ -794,6 +834,15 @@
         return partes[2] + '/' + partes[1] + '/' + partes[0];
       }
       return fecha;
+    }
+
+    function obtenerAnio(fecha) {
+      if (!fecha) return null;
+      var partes = fecha.split('-');
+      if (partes.length === 3) {
+        return parseInt(partes[0]);
+      }
+      return null;
     }
 
     function svgTick() {
@@ -1341,26 +1390,25 @@
 
     function renderEstadisticas() {
       var leidos = cargar(CLAVE_LEIDOS);
-      var total = leidos.length;
+      
+      // Filtrar por año
+      var librosFiltrados = leidos;
+      if (filtroAno !== 'todos') {
+        librosFiltrados = leidos.filter(function(libro) {
+          var anio = obtenerAnio(libro.fecha);
+          return anio === filtroAno;
+        });
+      }
+      
+      var total = librosFiltrados.length;
       var mediaEstrellas = 0;
       var librosConPuntuacion = 0;
-      var libroMejor = null;
-      var libroPeor = null;
       var citas = [];
-      var puntuaciones = [];
 
-      leidos.forEach(function(libro) {
+      librosFiltrados.forEach(function(libro) {
         if (typeof libro.puntuacion !== 'undefined' && libro.puntuacion > 0) {
-          puntuaciones.push(libro.puntuacion);
           librosConPuntuacion++;
           mediaEstrellas += libro.puntuacion;
-          
-          if (!libroMejor || libro.puntuacion > libroMejor.puntuacion) {
-            libroMejor = libro;
-          }
-          if (!libroPeor || libro.puntuacion < libroPeor.puntuacion) {
-            libroPeor = libro;
-          }
         }
         if (libro.cita && libro.cita.trim()) {
           citas.push({ titulo: libro.titulo, autor: libro.autor, cita: libro.cita });
@@ -1371,14 +1419,20 @@
         mediaEstrellas = (mediaEstrellas / librosConPuntuacion).toFixed(1);
       }
 
-      var html = '<div class="estadisticas">';
+      var html = '<div class="estadisticas-container">';
+      
+      // Filtro de años
+      var anos = obtenerAniosDisponibles(leidos);
+      html += '<div class="filtro-anos">';
+      html += '<button class="' + (filtroAno === 'todos' ? 'activo' : '') + '" data-ano="todos">Todos</button>';
+      anos.forEach(function(ano) {
+        html += '<button class="' + (filtroAno === ano ? 'activo' : '') + '" data-ano="' + ano + '">' + ano + '</button>';
+      });
+      html += '</div>';
+      
+      html += '<div class="estadisticas">';
       html += '<div class="stat"><div class="numero">' + total + '</div><div class="label">Libros leídos</div></div>';
       html += '<div class="stat"><div class="numero">' + mediaEstrellas + ' ★</div><div class="label">Media estrellas</div></div>';
-      
-      if (libroMejor) {
-        html += '<div class="stat"><div class="numero">' + libroMejor.titulo + '</div><div class="label">Mejor valorado</div></div>';
-      }
-      
       html += '</div>';
 
       // Citas destacadas
@@ -1394,7 +1448,32 @@
         html += '<div class="lista-vacia">Aún no hay citas destacadas. Añade citas a tus libros leídos.</div>';
       }
 
+      html += '</div>';
       estadisticasContainer.innerHTML = html;
+
+      // Event listeners para los botones de filtro
+      document.querySelectorAll('.filtro-anos button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          filtroAno = this.getAttribute('data-ano');
+          if (filtroAno === 'todos') {
+            filtroAno = 'todos';
+          } else {
+            filtroAno = parseInt(filtroAno);
+          }
+          renderEstadisticas();
+        });
+      });
+    }
+
+    function obtenerAniosDisponibles(leidos) {
+      var anos = new Set();
+      leidos.forEach(function(libro) {
+        var anio = obtenerAnio(libro.fecha);
+        if (anio !== null) {
+          anos.add(anio);
+        }
+      });
+      return Array.from(anos).sort(function(a, b) { return b - a; }); // Descendente
     }
 
     function anadirLibro() {
