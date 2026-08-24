@@ -574,6 +574,86 @@
       color: var(--texto-suave);
     }
 
+    /* Gráfico mensual */
+    .grafico-mensual {
+      background-color: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+
+    .grafico-mensual .grafico-titulo {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--texto-suave);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .grafico-mensual .barras {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      height: 160px;
+      gap: 6px;
+      padding: 0 4px;
+    }
+
+    .grafico-mensual .barra-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .grafico-mensual .barra-item .barra {
+      width: 100%;
+      max-width: 30px;
+      min-height: 4px;
+      background-color: var(--acento);
+      border-radius: 4px 4px 0 0;
+      transition: height 0.6s ease;
+      opacity: 0.7;
+      position: relative;
+    }
+
+    .grafico-mensual .barra-item .barra:hover {
+      opacity: 1;
+    }
+
+    .grafico-mensual .barra-item .barra .barra-valor {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: var(--texto-suave);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .grafico-mensual .barra-item .barra:hover .barra-valor {
+      opacity: 1;
+    }
+
+    .grafico-mensual .barra-item .mes-label {
+      font-size: 0.6rem;
+      color: var(--texto-suave);
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .grafico-mensual .sin-datos {
+      color: var(--texto-suave);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 20px 0;
+    }
+
     .lista-vacia {
       color: var(--texto-suave);
       font-size: 0.9rem;
@@ -643,7 +723,6 @@
       border-color: var(--acento);
     }
 
-    /* Búsqueda */
     .busqueda {
       display: flex;
       gap: 10px;
@@ -726,6 +805,14 @@
       header {
         padding: 40px 16px 16px;
       }
+
+      .grafico-mensual .barras {
+        height: 120px;
+      }
+
+      .grafico-mensual .barra-item .mes-label {
+        font-size: 0.5rem;
+      }
     }
 
     @media (max-width: 540px) {
@@ -798,6 +885,15 @@
 
       .estadisticas-container .filtro-anos {
         justify-content: center;
+      }
+
+      .grafico-mensual .barras {
+        height: 100px;
+        gap: 4px;
+      }
+
+      .grafico-mensual .barra-item .barra {
+        max-width: 20px;
       }
     }
   </style>
@@ -925,6 +1021,15 @@
       var partes = fecha.split('-');
       if (partes.length === 3) {
         return parseInt(partes[0]);
+      }
+      return null;
+    }
+
+    function obtenerMes(fecha) {
+      if (!fecha) return null;
+      var partes = fecha.split('-');
+      if (partes.length === 3) {
+        return parseInt(partes[1]);
       }
       return null;
     }
@@ -1500,6 +1605,44 @@
       actualizarBadges();
     }
 
+    // ===== GRÁFICO MENSUAL =====
+    function renderGraficoMensual(libros, año) {
+      var meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      var librosPorMes = Array(12).fill(0);
+      
+      libros.forEach(function(libro) {
+        var anio = obtenerAnio(libro.fecha);
+        var mes = obtenerMes(libro.fecha);
+        if (anio === año && mes !== null && mes >= 1 && mes <= 12) {
+          librosPorMes[mes - 1]++;
+        }
+      });
+      
+      var max = Math.max(1, Math.max.apply(null, librosPorMes));
+      
+      var html = '<div class="grafico-mensual">';
+      html += '<div class="grafico-titulo">Libros leídos por mes - ' + año + '</div>';
+      html += '<div class="barras">';
+      
+      for (var i = 0; i < 12; i++) {
+        var altura = Math.max(4, (librosPorMes[i] / max) * 140);
+        var valor = librosPorMes[i];
+        html += '<div class="barra-item">';
+        html += '<div class="barra" style="height:' + altura + 'px;">';
+        if (valor > 0) {
+          html += '<span class="barra-valor">' + valor + '</span>';
+        }
+        html += '</div>';
+        html += '<span class="mes-label">' + meses[i] + '</span>';
+        html += '</div>';
+      }
+      
+      html += '</div>';
+      html += '</div>';
+      
+      return html;
+    }
+
     function renderEstadisticas() {
       var leidos = cargar(CLAVE_LEIDOS);
       
@@ -1545,6 +1688,21 @@
       html += '<div class="stat"><div class="numero">' + mediaEstrellas + ' ★</div><div class="label">Media estrellas</div></div>';
       html += '</div>';
 
+      // Gráfico mensual
+      if (filtroAno !== 'todos' && total > 0) {
+        html += renderGraficoMensual(librosFiltrados, filtroAno);
+      } else if (filtroAno === 'todos' && anos.length > 0) {
+        // Si está en "Todos", mostrar el gráfico del año más reciente
+        var añoReciente = anos[0];
+        var librosDelAño = leidos.filter(function(libro) {
+          return obtenerAnio(libro.fecha) === añoReciente;
+        });
+        if (librosDelAño.length > 0) {
+          html += renderGraficoMensual(librosDelAño, añoReciente);
+        }
+      }
+
+      // Citas destacadas
       if (citas.length > 0) {
         html += '<div class="seccion-titulo" style="margin-top:16px;">Citas destacadas</div>';
         citas.forEach(function(cita) {
@@ -1571,7 +1729,6 @@
           renderEstadisticas();
         });
       });
-      actualizarBadges();
     }
 
     function obtenerAniosDisponibles(leidos) {
