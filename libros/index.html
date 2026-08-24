@@ -574,7 +574,7 @@
       color: var(--texto-suave);
     }
 
-    /* Gráfico mensual */
+    /* Gráfico mensual - Barras */
     .grafico-mensual {
       background-color: var(--fondo-tarjeta);
       border: 1px solid var(--borde);
@@ -648,6 +648,60 @@
     }
 
     .grafico-mensual .sin-datos {
+      color: var(--texto-suave);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    /* Gráfico de líneas para comparar años */
+    .grafico-lineas {
+      background-color: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .grafico-lineas .grafico-titulo {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--texto-suave);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .grafico-lineas .grafico-svg {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+
+    .grafico-lineas .linea-leyenda {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .grafico-lineas .linea-leyenda .leyenda-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--texto-suave);
+    }
+
+    .grafico-lineas .linea-leyenda .leyenda-item .color-muestra {
+      display: inline-block;
+      width: 20px;
+      height: 3px;
+      border-radius: 2px;
+    }
+
+    .grafico-lineas .sin-datos {
       color: var(--texto-suave);
       font-size: 0.9rem;
       text-align: center;
@@ -813,6 +867,11 @@
       .grafico-mensual .barra-item .mes-label {
         font-size: 0.5rem;
       }
+
+      .grafico-lineas .grafico-svg {
+        width: 100%;
+        height: auto;
+      }
     }
 
     @media (max-width: 540px) {
@@ -894,6 +953,14 @@
 
       .grafico-mensual .barra-item .barra {
         max-width: 20px;
+      }
+
+      .grafico-lineas .linea-leyenda {
+        gap: 8px;
+      }
+
+      .grafico-lineas .linea-leyenda .leyenda-item {
+        font-size: 0.65rem;
       }
     }
   </style>
@@ -1605,7 +1672,7 @@
       actualizarBadges();
     }
 
-    // ===== GRÁFICO MENSUAL =====
+    // ===== GRÁFICO MENSUAL (BARRAS) =====
     function renderGraficoMensual(libros, año) {
       var meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
       var librosPorMes = Array(12).fill(0);
@@ -1638,6 +1705,132 @@
       }
       
       html += '</div>';
+      html += '</div>';
+      
+      return html;
+    }
+
+    // ===== GRÁFICO DE LÍNEAS (COMPARAR AÑOS) =====
+    function renderGraficoLineas(leidos) {
+      var meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      
+      // Obtener todos los años disponibles
+      var anos = obtenerAniosDisponibles(leidos);
+      if (anos.length === 0) return '';
+      
+      // Para cada año, contar libros por mes
+      var datosAnos = {};
+      anos.forEach(function(ano) {
+        var librosPorMes = Array(12).fill(0);
+        leidos.forEach(function(libro) {
+          var anio = obtenerAnio(libro.fecha);
+          var mes = obtenerMes(libro.fecha);
+          if (anio === ano && mes !== null && mes >= 1 && mes <= 12) {
+            librosPorMes[mes - 1]++;
+          }
+        });
+        datosAnos[ano] = librosPorMes;
+      });
+      
+      // Calcular el máximo para la escala
+      var maxValor = 1;
+      for (var ano in datosAnos) {
+        var maxAno = Math.max.apply(null, datosAnos[ano]);
+        if (maxAno > maxValor) maxValor = maxAno;
+      }
+      
+      // Colores para cada año
+      var colores = ['#8a7a5c', '#b8926a', '#6a8a7a', '#8a6a8a', '#6a7a8a', '#7a8a6a'];
+      
+      // Generar SVG
+      var ancho = 700;
+      var alto = 200;
+      var padding = { top: 20, bottom: 30, left: 30, right: 20 };
+      var graficoAncho = ancho - padding.left - padding.right;
+      var graficoAlto = alto - padding.top - padding.bottom;
+      
+      var puntos = 12;
+      var pasoX = graficoAncho / (puntos - 1);
+      
+      var svg = '<svg class="grafico-svg" viewBox="0 0 ' + ancho + ' ' + alto + '" xmlns="http://www.w3.org/2000/svg">';
+      
+      // Eje X (meses)
+      svg += '<g transform="translate(' + padding.left + ',' + (alto - padding.bottom) + ')">';
+      svg += '<line x1="0" y1="0" x2="' + graficoAncho + '" y2="0" stroke="var(--borde)" stroke-width="1"/>';
+      for (var i = 0; i < puntos; i++) {
+        var x = i * pasoX;
+        svg += '<line x1="' + x + '" y1="0" x2="' + x + '" y2="4" stroke="var(--borde)" stroke-width="1"/>';
+        svg += '<text x="' + x + '" y="18" text-anchor="middle" font-size="10" fill="var(--texto-suave)">' + meses[i] + '</text>';
+      }
+      svg += '</g>';
+      
+      // Eje Y (valores)
+      svg += '<g transform="translate(' + padding.left + ',' + padding.top + ')">';
+      var numLineas = Math.min(5, maxValor);
+      if (numLineas < 1) numLineas = 1;
+      for (var i = 0; i <= numLineas; i++) {
+        var y = graficoAlto - (i / numLineas) * graficoAlto;
+        var valor = Math.round((i / numLineas) * maxValor);
+        svg += '<line x1="0" y1="' + y + '" x2="' + graficoAncho + '" y2="' + y + '" stroke="var(--borde)" stroke-width="0.5" stroke-dasharray="3,3"/>';
+        svg += '<text x="-6" y="' + (y + 4) + '" text-anchor="end" font-size="9" fill="var(--texto-suave)">' + valor + '</text>';
+      }
+      svg += '</g>';
+      
+      // Dibujar líneas para cada año
+      var indexAno = 0;
+      for (var ano in datosAnos) {
+        var color = colores[indexAno % colores.length];
+        var datos = datosAnos[ano];
+        
+        // Construir el path de la línea
+        var pathD = '';
+        var puntosPath = [];
+        var primerPunto = true;
+        for (var i = 0; i < datos.length; i++) {
+          var x = padding.left + i * pasoX;
+          var y = padding.top + graficoAlto - (datos[i] / maxValor) * graficoAlto;
+          if (primerPunto) {
+            pathD += 'M ' + x + ' ' + y;
+            primerPunto = false;
+          } else {
+            pathD += ' L ' + x + ' ' + y;
+          }
+          puntosPath.push({ x: x, y: y, valor: datos[i] });
+        }
+        
+        svg += '<polyline points="' + pathD.replace(/[ML]/g, '').trim() + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>';
+        
+        // Puntos en la línea
+        for (var i = 0; i < puntosPath.length; i++) {
+          var p = puntosPath[i];
+          if (p.valor > 0) {
+            svg += '<circle cx="' + p.x + '" cy="' + p.y + '" r="3.5" fill="' + color + '" opacity="0.9"/>';
+            // Valor al hacer hover (simulado con tooltip en HTML)
+          }
+        }
+        
+        indexAno++;
+      }
+      
+      svg += '</svg>';
+      
+      // Leyenda
+      var leyenda = '<div class="linea-leyenda">';
+      var idx = 0;
+      for (var ano in datosAnos) {
+        var color = colores[idx % colores.length];
+        leyenda += '<span class="leyenda-item">';
+        leyenda += '<span class="color-muestra" style="background-color:' + color + ';"></span>';
+        leyenda += ano;
+        leyenda += '</span>';
+        idx++;
+      }
+      leyenda += '</div>';
+      
+      var html = '<div class="grafico-lineas">';
+      html += '<div class="grafico-titulo">Comparativa anual por meses</div>';
+      html += svg;
+      html += leyenda;
       html += '</div>';
       
       return html;
@@ -1688,17 +1881,13 @@
       html += '<div class="stat"><div class="numero">' + mediaEstrellas + ' ★</div><div class="label">Media estrellas</div></div>';
       html += '</div>';
 
-      // Gráfico mensual
+      // Gráfico: barras si es un año específico, líneas si es "Todos"
       if (filtroAno !== 'todos' && total > 0) {
         html += renderGraficoMensual(librosFiltrados, filtroAno);
-      } else if (filtroAno === 'todos' && anos.length > 0) {
-        // Si está en "Todos", mostrar el gráfico del año más reciente
-        var añoReciente = anos[0];
-        var librosDelAño = leidos.filter(function(libro) {
-          return obtenerAnio(libro.fecha) === añoReciente;
-        });
-        if (librosDelAño.length > 0) {
-          html += renderGraficoMensual(librosDelAño, añoReciente);
+      } else if (filtroAno === 'todos') {
+        var graficoLineas = renderGraficoLineas(leidos);
+        if (graficoLineas) {
+          html += graficoLineas;
         }
       }
 
