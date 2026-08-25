@@ -360,7 +360,6 @@
       flex-wrap: wrap;
     }
 
-    /* Botón eliminar (X) */
     .boton-eliminar {
       background: none;
       border: 1px solid var(--borde);
@@ -499,6 +498,7 @@
       opacity: 0.5;
     }
 
+    /* Área de citas */
     .cita-area {
       display: none;
       margin-top: 12px;
@@ -512,31 +512,107 @@
       display: block;
     }
 
-    .cita-area textarea {
-      width: 100%;
-      min-height: 60px;
-      padding: 10px 12px;
+    .cita-area .cita-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .cita-area .cita-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 12px;
+      background-color: var(--fondo);
+      border-radius: 6px;
+      border-left: 3px solid var(--acento);
+    }
+
+    .cita-area .cita-item .cita-texto {
+      flex: 1;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--texto);
+      line-height: 1.5;
+    }
+
+    .cita-area .cita-item .cita-eliminar {
+      background: none;
+      border: none;
+      color: var(--texto-suave);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0 4px;
+      transition: color 0.2s ease;
+      line-height: 1;
+    }
+
+    .cita-area .cita-item .cita-eliminar:hover {
+      color: #d32f2f;
+    }
+
+    .cita-area .cita-input-area {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .cita-area .cita-input-area input {
+      flex: 1;
+      padding: 8px 12px;
       border: 1px solid var(--borde);
-      border-radius: 8px;
+      border-radius: 6px;
       background-color: var(--fondo);
       color: var(--texto);
       font-family: inherit;
       font-size: 0.85rem;
       outline: none;
-      resize: vertical;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      line-height: 1.5;
+      transition: border-color 0.2s ease;
       font-style: italic;
     }
 
-    .cita-area textarea:focus {
+    .cita-area .cita-input-area input:focus {
       border-color: var(--acento);
-      box-shadow: 0 0 0 3px rgba(138, 122, 92, 0.1);
     }
 
-    .cita-area textarea::placeholder {
+    .cita-area .cita-input-area input::placeholder {
       color: var(--texto-suave);
       opacity: 0.5;
+      font-style: italic;
+    }
+
+    .cita-area .cita-input-area .boton-cita-guardar {
+      flex: none;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--acento);
+      border-radius: 6px;
+      background-color: transparent;
+      color: var(--acento);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .cita-area .cita-input-area .boton-cita-guardar:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+    }
+
+    .cita-area .cita-input-area .boton-cita-guardar svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .cita-area .sin-citas {
+      color: var(--texto-suave);
+      font-size: 0.8rem;
+      font-style: italic;
+      opacity: 0.6;
+      padding: 4px 0;
     }
 
     /* Estadísticas */
@@ -604,7 +680,6 @@
       color: var(--texto-suave);
     }
 
-    /* Gráfico mensual - Barras */
     .grafico-mensual {
       background-color: var(--fondo-tarjeta);
       border: 1px solid var(--borde);
@@ -684,7 +759,6 @@
       padding: 20px 0;
     }
 
-    /* Gráfico de líneas para comparar años */
     .grafico-lineas {
       background-color: var(--fondo-tarjeta);
       border: 1px solid var(--borde);
@@ -992,6 +1066,14 @@
       .grafico-lineas .linea-leyenda .leyenda-item {
         font-size: 0.65rem;
       }
+
+      .cita-area .cita-input-area {
+        flex-wrap: wrap;
+      }
+
+      .cita-area .cita-input-area input {
+        flex: 1 1 100%;
+      }
     }
   </style>
 </head>
@@ -1276,6 +1358,31 @@
       return svg;
     }
 
+    function svgPlus() {
+      var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("fill", "none");
+      svg.setAttribute("stroke", "currentColor");
+      svg.setAttribute("stroke-width", "2");
+      svg.setAttribute("stroke-linecap", "round");
+      
+      var line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line1.setAttribute("x1", "12");
+      line1.setAttribute("y1", "5");
+      line1.setAttribute("x2", "12");
+      line1.setAttribute("y2", "19");
+      svg.appendChild(line1);
+      
+      var line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line2.setAttribute("x1", "5");
+      line2.setAttribute("y1", "12");
+      line2.setAttribute("x2", "19");
+      line2.setAttribute("y2", "12");
+      svg.appendChild(line2);
+      
+      return svg;
+    }
+
     function crearInfoLibro(libro) {
       var div = document.createElement("div");
       div.className = "info";
@@ -1478,68 +1585,228 @@
       return contenedor;
     }
 
-    function crearCitaParaLeer(libro, indice) {
+    // ===== FUNCIONES PARA CITAS =====
+    function crearCitasParaLeer(libro, indice) {
       var contenedor = document.createElement("div");
       contenedor.className = "cita-area";
       
-      var textarea = document.createElement("textarea");
-      textarea.value = libro.cita || '';
-      textarea.placeholder = "Escribe aquí las citas que vayas encontrando...";
-      textarea.setAttribute("data-indice", indice);
+      // Lista de citas
+      var lista = document.createElement("div");
+      lista.className = "cita-lista";
       
-      textarea.addEventListener("input", function() {
-        var idx = parseInt(this.getAttribute("data-indice"));
-        var lista = cargar(CLAVE_PARA_LEER);
-        if (lista[idx]) {
-          lista[idx].cita = this.value;
-          guardar(CLAVE_PARA_LEER, lista);
+      var citas = libro.citas || [];
+      if (citas.length === 0) {
+        var sinCitas = document.createElement("div");
+        sinCitas.className = "sin-citas";
+        sinCitas.textContent = "No hay citas aún. Escribe una abajo.";
+        lista.appendChild(sinCitas);
+      } else {
+        citas.forEach(function(cita, citaIdx) {
+          var item = document.createElement("div");
+          item.className = "cita-item";
+          
+          var texto = document.createElement("span");
+          texto.className = "cita-texto";
+          texto.textContent = '"' + cita + '"';
+          item.appendChild(texto);
+          
+          var eliminar = document.createElement("button");
+          eliminar.className = "cita-eliminar";
+          eliminar.textContent = "×";
+          eliminar.setAttribute("data-cita-indice", citaIdx);
+          eliminar.addEventListener("click", function(e) {
+            e.stopPropagation();
+            eliminarCitaParaLeer(indice, citaIdx);
+          });
+          item.appendChild(eliminar);
+          
+          lista.appendChild(item);
+        });
+      }
+      
+      contenedor.appendChild(lista);
+      
+      // Input para añadir nueva cita
+      var inputArea = document.createElement("div");
+      inputArea.className = "cita-input-area";
+      
+      var input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Escribe una cita y presiona Enter o el tick...";
+      input.setAttribute("data-indice", indice);
+      
+      var botonGuardar = document.createElement("button");
+      botonGuardar.className = "boton-cita-guardar";
+      botonGuardar.type = "button";
+      botonGuardar.setAttribute("aria-label", "Guardar cita");
+      botonGuardar.appendChild(svgTick());
+      
+      function guardarCita() {
+        var texto = input.value.trim();
+        if (texto) {
+          var idx = parseInt(input.getAttribute("data-indice"));
+          var lista = cargar(CLAVE_PARA_LEER);
+          if (lista[idx]) {
+            if (!lista[idx].citas) lista[idx].citas = [];
+            lista[idx].citas.push(texto);
+            guardar(CLAVE_PARA_LEER, lista);
+            input.value = '';
+            renderParaLeer();
+            // Reabrir el área de citas
+            setTimeout(function() {
+              var libroElement = document.querySelector('.libro[data-indice="' + idx + '"]');
+              if (libroElement) {
+                var citaArea = libroElement.querySelector('.cita-area');
+                var botonCita = libroElement.querySelector('.boton-cita');
+                if (citaArea && botonCita) {
+                  citaArea.classList.add('visible');
+                  botonCita.classList.add('abierto');
+                }
+              }
+            }, 50);
+          }
+        } else {
+          input.focus();
+        }
+      }
+      
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          guardarCita();
         }
       });
-
-      contenedor.appendChild(textarea);
-      return contenedor;
-    }
-
-    function crearCitaLeido(libro, indice) {
-      var contenedor = document.createElement("div");
-      contenedor.className = "cita-area";
       
-      var textarea = document.createElement("textarea");
-      textarea.value = libro.cita || '';
-      textarea.placeholder = "Escribe aquí una cita destacada...";
-      textarea.setAttribute("data-indice", indice);
-      
-      textarea.addEventListener("input", function() {
-        var idx = parseInt(this.getAttribute("data-indice"));
-        var leidos = cargar(CLAVE_LEIDOS);
-        if (leidos[idx]) {
-          leidos[idx].cita = this.value;
-          guardar(CLAVE_LEIDOS, leidos);
-        }
-      });
-
-      contenedor.appendChild(textarea);
-      return contenedor;
-    }
-
-    function crearBotonEliminar(indice) {
-      var boton = document.createElement("button");
-      boton.className = "boton-eliminar";
-      boton.type = "button";
-      boton.setAttribute("data-indice", indice);
-      boton.title = "Eliminar libro";
-      boton.setAttribute("aria-label", "Eliminar libro");
-      boton.appendChild(svgClose());
-      
-      boton.addEventListener("click", function(e) {
+      botonGuardar.addEventListener("click", function(e) {
         e.stopPropagation();
-        var idx = parseInt(this.getAttribute("data-indice"));
-        if (confirm("¿Eliminar este libro de la lista?")) {
-          eliminarLibroParaLeer(idx);
+        guardarCita();
+      });
+      
+      inputArea.appendChild(input);
+      inputArea.appendChild(botonGuardar);
+      contenedor.appendChild(inputArea);
+      
+      return contenedor;
+    }
+
+    function eliminarCitaParaLeer(indiceLibro, indiceCita) {
+      var lista = cargar(CLAVE_PARA_LEER);
+      if (lista[indiceLibro] && lista[indiceLibro].citas) {
+        lista[indiceLibro].citas.splice(indiceCita, 1);
+        guardar(CLAVE_PARA_LEER, lista);
+        renderParaLeer();
+      }
+    }
+
+    function eliminarCitaLeido(indiceLibro, indiceCita) {
+      var lista = cargar(CLAVE_LEIDOS);
+      if (lista[indiceLibro] && lista[indiceLibro].citas) {
+        lista[indiceLibro].citas.splice(indiceCita, 1);
+        guardar(CLAVE_LEIDOS, lista);
+        renderLeidos();
+        renderEstadisticas();
+      }
+    }
+
+    function crearCitasLeido(libro, indice) {
+      var contenedor = document.createElement("div");
+      contenedor.className = "cita-area";
+      
+      var lista = document.createElement("div");
+      lista.className = "cita-lista";
+      
+      var citas = libro.citas || [];
+      if (citas.length === 0) {
+        var sinCitas = document.createElement("div");
+        sinCitas.className = "sin-citas";
+        sinCitas.textContent = "No hay citas para este libro.";
+        lista.appendChild(sinCitas);
+      } else {
+        citas.forEach(function(cita, citaIdx) {
+          var item = document.createElement("div");
+          item.className = "cita-item";
+          
+          var texto = document.createElement("span");
+          texto.className = "cita-texto";
+          texto.textContent = '"' + cita + '"';
+          item.appendChild(texto);
+          
+          var eliminar = document.createElement("button");
+          eliminar.className = "cita-eliminar";
+          eliminar.textContent = "×";
+          eliminar.setAttribute("data-cita-indice", citaIdx);
+          eliminar.addEventListener("click", function(e) {
+            e.stopPropagation();
+            eliminarCitaLeido(indice, citaIdx);
+          });
+          item.appendChild(eliminar);
+          
+          lista.appendChild(item);
+        });
+      }
+      
+      contenedor.appendChild(lista);
+      
+      var inputArea = document.createElement("div");
+      inputArea.className = "cita-input-area";
+      
+      var input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Añadir otra cita...";
+      input.setAttribute("data-indice", indice);
+      
+      var botonGuardar = document.createElement("button");
+      botonGuardar.className = "boton-cita-guardar";
+      botonGuardar.type = "button";
+      botonGuardar.setAttribute("aria-label", "Guardar cita");
+      botonGuardar.appendChild(svgTick());
+      
+      function guardarCitaLeido() {
+        var texto = input.value.trim();
+        if (texto) {
+          var idx = parseInt(input.getAttribute("data-indice"));
+          var lista = cargar(CLAVE_LEIDOS);
+          if (lista[idx]) {
+            if (!lista[idx].citas) lista[idx].citas = [];
+            lista[idx].citas.push(texto);
+            guardar(CLAVE_LEIDOS, lista);
+            input.value = '';
+            renderLeidos();
+            renderEstadisticas();
+            setTimeout(function() {
+              var libroElement = document.querySelector('.libro[data-indice="' + idx + '"]');
+              if (libroElement) {
+                var citaArea = libroElement.querySelector('.cita-area');
+                var botonCita = libroElement.querySelector('.boton-cita');
+                if (citaArea && botonCita) {
+                  citaArea.classList.add('visible');
+                  botonCita.classList.add('abierto');
+                }
+              }
+            }, 50);
+          }
+        } else {
+          input.focus();
+        }
+      }
+      
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          guardarCitaLeido();
         }
       });
       
-      return boton;
+      botonGuardar.addEventListener("click", function(e) {
+        e.stopPropagation();
+        guardarCitaLeido();
+      });
+      
+      inputArea.appendChild(input);
+      inputArea.appendChild(botonGuardar);
+      contenedor.appendChild(inputArea);
+      
+      return contenedor;
     }
 
     function crearBotonNota(indice) {
@@ -1584,8 +1851,8 @@
       boton.className = "boton-cita";
       boton.type = "button";
       boton.setAttribute("data-indice", indice);
-      boton.title = "Abrir cita";
-      boton.setAttribute("aria-label", "Abrir cita");
+      boton.title = "Abrir citas";
+      boton.setAttribute("aria-label", "Abrir citas");
       boton.appendChild(svgQuote());
       
       boton.addEventListener("click", function(e) {
@@ -1606,9 +1873,9 @@
         if (!estaAbierto) {
           citaArea.classList.add('visible');
           this.classList.add('abierto');
-          var textarea = citaArea.querySelector('textarea');
-          if (textarea) {
-            setTimeout(function() { textarea.focus(); }, 50);
+          var input = citaArea.querySelector('input');
+          if (input) {
+            setTimeout(function() { input.focus(); }, 50);
           }
         }
       });
@@ -1616,37 +1883,20 @@
       return boton;
     }
 
-    function crearBotonCitaLeido(indice) {
+    function crearBotonEliminar(indice) {
       var boton = document.createElement("button");
-      boton.className = "boton-cita";
+      boton.className = "boton-eliminar";
       boton.type = "button";
       boton.setAttribute("data-indice", indice);
-      boton.title = "Abrir cita";
-      boton.setAttribute("aria-label", "Abrir cita");
-      boton.appendChild(svgQuote());
+      boton.title = "Eliminar libro";
+      boton.setAttribute("aria-label", "Eliminar libro");
+      boton.appendChild(svgClose());
       
       boton.addEventListener("click", function(e) {
         e.stopPropagation();
         var idx = parseInt(this.getAttribute("data-indice"));
-        var libroElement = this.closest('.libro');
-        var citaArea = libroElement.querySelector('.cita-area');
-        var notaArea = libroElement.querySelector('.nota-area');
-        var estaAbierto = citaArea.classList.contains('visible');
-        
-        document.querySelectorAll('.nota-area.visible, .cita-area.visible').forEach(function(el) {
-          el.classList.remove('visible');
-        });
-        document.querySelectorAll('.boton-nota.abierto, .boton-cita.abierto').forEach(function(el) {
-          el.classList.remove('abierto');
-        });
-        
-        if (!estaAbierto) {
-          citaArea.classList.add('visible');
-          this.classList.add('abierto');
-          var textarea = citaArea.querySelector('textarea');
-          if (textarea) {
-            setTimeout(function() { textarea.focus(); }, 50);
-          }
+        if (confirm("¿Eliminar este libro de la lista?")) {
+          eliminarLibroParaLeer(idx);
         }
       });
       
@@ -1735,6 +1985,7 @@
       libros.forEach(function (libro, indice) {
         var fila = document.createElement("div");
         fila.className = "libro";
+        fila.setAttribute("data-indice", indice);
         
         var filaPrincipal = document.createElement("div");
         filaPrincipal.className = "fila-principal";
@@ -1747,7 +1998,6 @@
         var filaAcciones = document.createElement("div");
         filaAcciones.className = "fila-acciones";
         
-        // Botón marcar como leído
         var tick = document.createElement("button");
         tick.className = "boton-cuadrado";
         tick.type = "button";
@@ -1759,23 +2009,16 @@
         });
         filaAcciones.appendChild(tick);
         
-        // Botón nota
         filaAcciones.appendChild(crearBotonNota(indice));
-        
-        // Botón cita
         filaAcciones.appendChild(crearBotonCita(indice));
-        
-        // Botón eliminar (X)
         filaAcciones.appendChild(crearBotonEliminar(indice));
         
         acciones.appendChild(filaAcciones);
         filaPrincipal.appendChild(acciones);
         fila.appendChild(filaPrincipal);
         
-        // Área de nota
         fila.appendChild(crearNota(libro, indice));
-        // Área de cita
-        fila.appendChild(crearCitaParaLeer(libro, indice));
+        fila.appendChild(crearCitasParaLeer(libro, indice));
         
         listaParaLeer.appendChild(fila);
       });
@@ -1807,6 +2050,7 @@
         
         var fila = document.createElement("div");
         fila.className = "libro";
+        fila.setAttribute("data-indice", indiceReal);
         
         var filaPrincipal = document.createElement("div");
         filaPrincipal.className = "fila-principal";
@@ -1821,14 +2065,14 @@
         filaAcciones.appendChild(crearEstrellas(libro, indiceReal));
         filaAcciones.appendChild(crearFechaLeido(libro, indiceReal));
         filaAcciones.appendChild(crearBotonNota(indiceReal));
-        filaAcciones.appendChild(crearBotonCitaLeido(indiceReal));
+        filaAcciones.appendChild(crearBotonCita(indiceReal));
         
         acciones.appendChild(filaAcciones);
         filaPrincipal.appendChild(acciones);
         fila.appendChild(filaPrincipal);
         
         fila.appendChild(crearNota(libro, indiceReal));
-        fila.appendChild(crearCitaLeido(libro, indiceReal));
+        fila.appendChild(crearCitasLeido(libro, indiceReal));
         
         listaLeidos.appendChild(fila);
       });
@@ -2008,8 +2252,10 @@
           librosConPuntuacion++;
           mediaEstrellas += libro.puntuacion;
         }
-        if (libro.cita && libro.cita.trim()) {
-          citas.push({ titulo: libro.titulo, autor: libro.autor, cita: libro.cita });
+        if (libro.citas && libro.citas.length > 0) {
+          libro.citas.forEach(function(cita) {
+            citas.push({ titulo: libro.titulo, autor: libro.autor, cita: cita });
+          });
         }
       });
 
@@ -2050,7 +2296,7 @@
           html += '</div>';
         });
       } else {
-        html += '<div class="lista-vacia">Aún no hay citas destacadas. Añade citas a tus libros leídos.</div>';
+        html += '<div class="lista-vacia">Aún no hay citas destacadas. Añade citas a tus libros.</div>';
       }
 
       html += '</div>';
@@ -2088,7 +2334,7 @@
         return;
       }
       var libros = cargar(CLAVE_PARA_LEER);
-      libros.unshift({ titulo: titulo, autor: autor });
+      libros.unshift({ titulo: titulo, autor: autor, citas: [] });
       guardar(CLAVE_PARA_LEER, libros);
       inputTitulo.value = "";
       inputAutor.value = "";
@@ -2103,8 +2349,13 @@
       var libro = paraLeer.splice(indice, 1)[0];
       libro.puntuacion = 0;
       libro.fecha = obtenerFechaActual();
-      // Si tiene cita, la mantenemos
-      if (!libro.cita) libro.cita = '';
+      if (!libro.citas) libro.citas = [];
+      // Si había una cita antigua en el campo 'cita', la migramos
+      if (libro.cita && libro.cita.trim()) {
+        if (!libro.citas) libro.citas = [];
+        libro.citas.push(libro.cita);
+        libro.cita = '';
+      }
       leidos.unshift(libro);
       guardar(CLAVE_PARA_LEER, paraLeer);
       guardar(CLAVE_LEIDOS, leidos);
@@ -2182,6 +2433,17 @@
           
           if (typeof datos.paraLeer !== 'undefined' && typeof datos.leidos !== 'undefined') {
             if (confirm("¿Importar datos? Se sobrescribirán los datos actuales.")) {
+              // Asegurar que los libros tengan el campo citas
+              if (datos.paraLeer) {
+                datos.paraLeer.forEach(function(libro) {
+                  if (!libro.citas) libro.citas = [];
+                });
+              }
+              if (datos.leidos) {
+                datos.leidos.forEach(function(libro) {
+                  if (!libro.citas) libro.citas = [];
+                });
+              }
               guardar(CLAVE_PARA_LEER, datos.paraLeer);
               guardar(CLAVE_LEIDOS, datos.leidos);
               renderParaLeer();
