@@ -291,6 +291,7 @@
       font-size: 0.9rem;
       cursor: pointer;
       transition: all 0.2s ease;
+      text-decoration: none;
     }
 
     .boton-horario:hover {
@@ -587,36 +588,16 @@
 
     <p class="seccion-titulo">Ordutegia</p>
 
-    <button class="boton-horario" id="boton-horario" type="button">
+    <a class="boton-horario" href="ordutegia/">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="6 9 12 15 18 9"/>
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+        <polyline points="12 14 12 18 16 16"/>
       </svg>
-      Erakutsi ordutegia
-    </button>
-
-    <div class="horario-wrapper" id="horario-wrapper">
-      <div class="horario-container">
-        <table class="horario" id="tabla-horario">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Astelehena</th>
-              <th>Asteartea</th>
-              <th>Asteazkena</th>
-              <th>Osteguna</th>
-              <th>Ostirala</th>
-            </tr>
-          </thead>
-          <tbody id="cuerpo-horario"></tbody>
-        </table>
-      </div>
-
-      <div class="respaldo">
-        <button id="btn-exportar-horario" type="button">Ordutegia esportatu</button>
-        <button id="btn-importar-horario" type="button">Ordutegia inportatu</button>
-        <input type="file" id="input-archivo-horario" accept=".json">
-      </div>
-    </div>
+      Ordutegi interaktiboa
+    </a>
 
   </main>
 
@@ -652,151 +633,6 @@
         `;
       }
     });
-
-    // ===== HORARIO =====
-    var CLAVE_HORARIO = "horarioAkademia";
-    var horas = ['16:00', '17:00', '18:00', '19:00'];
-    var dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
-
-    var botonHorario = document.getElementById('boton-horario');
-    var horarioWrapper = document.getElementById('horario-wrapper');
-    var horarioAbierto = false;
-
-    botonHorario.addEventListener('click', function() {
-      horarioAbierto = !horarioAbierto;
-      if (horarioAbierto) {
-        horarioWrapper.classList.add('visible');
-        botonHorario.classList.add('abierto');
-        botonHorario.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-          Ezkutatu ordutegia
-        `;
-      } else {
-        horarioWrapper.classList.remove('visible');
-        botonHorario.classList.remove('abierto');
-        botonHorario.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-          Erakutsi ordutegia
-        `;
-      }
-    });
-
-    function cargarHorario() {
-      try {
-        var data = JSON.parse(localStorage.getItem(CLAVE_HORARIO));
-        if (data && data.length === horas.length && data[0] && data[0].length === dias.length) {
-          return data;
-        }
-      } catch (e) {}
-      return Array(horas.length).fill(null).map(function() {
-        return Array(dias.length).fill(null).map(function() {
-          return ['', '', '', '', ''];
-        });
-      });
-    }
-
-    function guardarHorario(datos) {
-      localStorage.setItem(CLAVE_HORARIO, JSON.stringify(datos));
-    }
-
-    function renderHorario() {
-      var datos = cargarHorario();
-      var tbody = document.getElementById('cuerpo-horario');
-      tbody.innerHTML = '';
-
-      for (var i = 0; i < horas.length; i++) {
-        var tr = document.createElement('tr');
-        var tdHora = document.createElement('td');
-        tdHora.className = 'hora';
-        tdHora.textContent = horas[i];
-        tr.appendChild(tdHora);
-
-        for (var j = 0; j < dias.length; j++) {
-          var td = document.createElement('td');
-          var celda = document.createElement('div');
-          celda.className = 'celda fila-' + i;
-          
-          for (var k = 0; k < 5; k++) {
-            var input = document.createElement('input');
-            input.type = 'text';
-            input.value = (datos[i][j] && datos[i][j][k]) || '';
-            input.placeholder = '';
-            input.setAttribute('data-fila', i);
-            input.setAttribute('data-col', j);
-            input.setAttribute('data-linea', k);
-            
-            input.addEventListener('input', function() {
-              var fila = parseInt(this.getAttribute('data-fila'));
-              var col = parseInt(this.getAttribute('data-col'));
-              var linea = parseInt(this.getAttribute('data-linea'));
-              var datosActuales = cargarHorario();
-              if (!datosActuales[fila][col]) {
-                datosActuales[fila][col] = ['', '', '', '', ''];
-              }
-              datosActuales[fila][col][linea] = this.value;
-              guardarHorario(datosActuales);
-            });
-
-            celda.appendChild(input);
-          }
-
-          td.appendChild(celda);
-          tr.appendChild(td);
-        }
-
-        tbody.appendChild(tr);
-      }
-    }
-
-    function exportarHorario() {
-      var datos = cargarHorario();
-      var blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = url;
-      a.download = "ordutegia_akademia_" + new Date().toISOString().slice(0,10) + ".json";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    function importarHorario(evento) {
-      var archivo = evento.target.files[0];
-      if (!archivo) return;
-
-      var lector = new FileReader();
-      lector.onload = function(e) {
-        try {
-          var datos = JSON.parse(e.target.result);
-          if (Array.isArray(datos) && datos.length === horas.length) {
-            if (confirm("Ordutegia inportatu? Uneko datuak gainidatziko dira.")) {
-              guardarHorario(datos);
-              renderHorario();
-              alert("Ordutegia behar bezala inportatu da.");
-            }
-          } else {
-            alert("Fitxategiak ez du formatu zuzena.");
-          }
-        } catch (error) {
-          alert("Errorea fitxategia irakurtzean: " + error.message);
-        }
-      };
-      lector.readAsText(archivo);
-      document.getElementById('input-archivo-horario').value = "";
-    }
-
-    document.getElementById('btn-exportar-horario').addEventListener('click', exportarHorario);
-    document.getElementById('btn-importar-horario').addEventListener('click', function() {
-      document.getElementById('input-archivo-horario').click();
-    });
-    document.getElementById('input-archivo-horario').addEventListener('change', importarHorario);
-
-    renderHorario();
   </script>
 </body>
 </html>
