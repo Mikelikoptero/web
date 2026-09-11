@@ -938,6 +938,38 @@
       opacity: 0.6;
     }
 
+    /* Filtro de años en Leídos */
+    .filtro-anos-leidos {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filtro-anos-leidos button {
+      padding: 4px 12px;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      background-color: transparent;
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filtro-anos-leidos button:hover {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .filtro-anos-leidos button.activo {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
     .respaldo {
       display: flex;
       gap: 12px;
@@ -983,7 +1015,6 @@
       gap: 8px;
     }
 
-    /* Estado de sincronización (al final) */
     .estado-sync {
       display: flex;
       align-items: center;
@@ -1201,6 +1232,7 @@
         </select>
         <button id="orden-direction-leidos" type="button">Descendente ↓</button>
       </div>
+      <div class="filtro-anos-leidos" id="filtro-anos-leidos"></div>
       <div class="busqueda">
         <input id="busqueda-leidos" type="text" placeholder="Buscar libro o autor..." autocomplete="off">
       </div>
@@ -1231,8 +1263,8 @@
     // ============================================================
     // CONFIGURACIÓN DE JSONBIN
     // ============================================================
-    var JSONBIN_BIN_ID = "6aa3dbfeac6210605ac03463"; // <-- PEGA AQUÍ TU BIN ID
-    var JSONBIN_MASTER_KEY = "$2a$10$xo8Ir.88S4dIk8hr90gpvum/5a5hG4K4VvV4xX3AvSilvZKMmO5Yy"; // <-- PEGA AQUÍ TU MASTER KEY
+    var JSONBIN_BIN_ID = "6aa3dbfeac6210605ac03463";
+    var JSONBIN_MASTER_KEY = "$2a$10$xo8Ir.88S4dIk8hr90gpvum/5a5hG4K4VvV4xX3AvSilvZKMmO5Yy";
 
     var JSONBIN_URL = "https://api.jsonbin.io/v3/b/" + JSONBIN_BIN_ID;
 
@@ -1253,6 +1285,7 @@
     var listaLeidos = document.getElementById("lista-leidos");
     var paginacionParaLeer = document.getElementById("paginacion-para-leer");
     var paginacionLeidos = document.getElementById("paginacion-leidos");
+    var filtroAnosLeidos = document.getElementById("filtro-anos-leidos");
     var estadisticasContainer = document.getElementById("estadisticas-container");
     var tabParaLeer = document.getElementById("tab-para-leer");
     var tabLeidos = document.getElementById("tab-leidos");
@@ -1270,7 +1303,8 @@
     var estadoSyncTexto = document.getElementById("estado-sync-texto");
 
     var direccionAscendenteLeidos = false;
-    var filtroAno = 'todos';
+    var filtroAno = 'todos'; // Filtro de estadísticas
+    var filtroAnoLeidos = 'todos'; // Filtro de la lista de leídos
     var paginaParaLeer = 1;
     var paginaLeidos = 1;
 
@@ -1810,7 +1844,6 @@
       paraLeer.splice(indice, 1);
       guardar(CLAVE_PARA_LEER, paraLeer);
       guardarEnNube();
-      // Ajustar la página si era la última
       var totalPaginas = Math.ceil(paraLeer.length / LIBROS_POR_PAGINA) || 1;
       if (paginaParaLeer > totalPaginas) paginaParaLeer = totalPaginas;
       renderParaLeer();
@@ -1903,10 +1936,8 @@
         return btn;
       }
 
-      // Botón anterior
       contenedor.appendChild(crearBoton("‹", paginaActual - 1, false, paginaActual === 1));
 
-      // Páginas
       var paginas = [];
       for (var i = 1; i <= totalPaginas; i++) {
         if (i === 1 || i === totalPaginas || Math.abs(i - paginaActual) <= 1) {
@@ -1926,8 +1957,45 @@
         ultimaPagina = p;
       });
 
-      // Botón siguiente
       contenedor.appendChild(crearBoton("›", paginaActual + 1, false, paginaActual === totalPaginas));
+    }
+
+    // ============================================================
+    // FILTRO DE AÑOS EN LEÍDOS
+    // ============================================================
+    function renderFiltroAnosLeidos() {
+      var leidos = cargar(CLAVE_LEIDOS);
+      var anos = obtenerAniosDisponibles(leidos);
+
+      filtroAnosLeidos.innerHTML = '';
+
+      if (anos.length === 0) return;
+
+      var btnTodos = document.createElement("button");
+      btnTodos.textContent = "Todos";
+      btnTodos.type = "button";
+      if (filtroAnoLeidos === 'todos') btnTodos.classList.add("activo");
+      btnTodos.addEventListener("click", function() {
+        filtroAnoLeidos = 'todos';
+        paginaLeidos = 1;
+        renderFiltroAnosLeidos();
+        renderLeidos();
+      });
+      filtroAnosLeidos.appendChild(btnTodos);
+
+      anos.forEach(function(ano) {
+        var btn = document.createElement("button");
+        btn.textContent = ano;
+        btn.type = "button";
+        if (filtroAnoLeidos === ano) btn.classList.add("activo");
+        btn.addEventListener("click", function() {
+          filtroAnoLeidos = ano;
+          paginaLeidos = 1;
+          renderFiltroAnosLeidos();
+          renderLeidos();
+        });
+        filtroAnosLeidos.appendChild(btn);
+      });
     }
 
     // ============================================================
@@ -1944,7 +2012,6 @@
         return;
       }
 
-      // Calcular paginación
       var totalPaginas = Math.ceil(libros.length / LIBROS_POR_PAGINA);
       if (paginaParaLeer > totalPaginas) paginaParaLeer = totalPaginas;
       if (paginaParaLeer < 1) paginaParaLeer = 1;
@@ -1954,7 +2021,7 @@
       var librosPagina = libros.slice(inicio, fin);
 
       librosPagina.forEach(function (libro, idx) {
-        var indice = inicio + idx; // índice real en el array completo
+        var indice = inicio + idx;
         var fila = document.createElement("div");
         fila.className = "libro";
         fila.setAttribute("data-indice", indice);
@@ -1990,7 +2057,6 @@
         listaParaLeer.appendChild(fila);
       });
 
-      // Renderizar paginación
       renderPaginacion(paginacionParaLeer, libros.length, paginaParaLeer, function(nuevaPagina) {
         paginaParaLeer = nuevaPagina;
         renderParaLeer();
@@ -2001,23 +2067,37 @@
 
     function renderLeidos() {
       var libros = cargar(CLAVE_LEIDOS);
+
+      var librosFiltradosPorAno = libros;
+      if (filtroAnoLeidos !== 'todos') {
+        librosFiltradosPorAno = libros.filter(function(libro) {
+          return obtenerAnio(libro.fecha) === filtroAnoLeidos;
+        });
+      }
+
       var campo = ordenCampoLeidos.value;
       var ascendente = direccionAscendenteLeidos;
+      var librosOrdenados = ordenarLibros(librosFiltradosPorAno, campo, ascendente);
 
-      var librosOrdenados = ordenarLibros(libros, campo, ascendente);
       var librosFiltrados = filtrarLibrosPorBusqueda(librosOrdenados, busquedaLeidos.value);
 
       listaLeidos.innerHTML = "";
 
       if (librosFiltrados.length === 0) {
-        var mensaje = libros.length === 0 ? "Todavía no hay libros leídos." : "No hay libros que coincidan con la búsqueda.";
+        var mensaje;
+        if (libros.length === 0) {
+          mensaje = "Todavía no hay libros leídos.";
+        } else if (filtroAnoLeidos !== 'todos') {
+          mensaje = "No hay libros leídos en " + filtroAnoLeidos + ".";
+        } else {
+          mensaje = "No hay libros que coincidan con la búsqueda.";
+        }
         listaLeidos.appendChild(mensajeVacio(mensaje));
         paginacionLeidos.innerHTML = '';
         actualizarBadges();
         return;
       }
 
-      // Calcular paginación
       var totalPaginas = Math.ceil(librosFiltrados.length / LIBROS_POR_PAGINA);
       if (paginaLeidos > totalPaginas) paginaLeidos = totalPaginas;
       if (paginaLeidos < 1) paginaLeidos = 1;
@@ -2055,7 +2135,6 @@
         listaLeidos.appendChild(fila);
       });
 
-      // Renderizar paginación
       renderPaginacion(paginacionLeidos, librosFiltrados.length, paginaLeidos, function(nuevaPagina) {
         paginaLeidos = nuevaPagina;
         renderLeidos();
@@ -2262,7 +2341,6 @@
       inputTitulo.value = "";
       inputAutor.value = "";
       inputTitulo.focus();
-      // Ir a la primera página para ver el libro recién añadido
       paginaParaLeer = 1;
       renderParaLeer();
       actualizarBadges();
@@ -2279,11 +2357,11 @@
       guardar(CLAVE_PARA_LEER, paraLeer);
       guardar(CLAVE_LEIDOS, leidos);
       guardarEnNube();
-      // Ajustar páginas
       var totalPaginasParaLeer = Math.ceil(paraLeer.length / LIBROS_POR_PAGINA) || 1;
       if (paginaParaLeer > totalPaginasParaLeer) paginaParaLeer = totalPaginasParaLeer;
       paginaLeidos = 1;
       renderParaLeer();
+      renderFiltroAnosLeidos();
       renderLeidos();
       renderEstadisticas();
       actualizarBadges();
@@ -2305,6 +2383,7 @@
       vistaLeidos.classList.remove("oculto");
       vistaParaLeer.classList.add("oculto");
       vistaEstadisticas.classList.add("oculto");
+      renderFiltroAnosLeidos();
       renderLeidos();
     }
 
@@ -2359,7 +2438,9 @@
               guardarEnNube();
               paginaParaLeer = 1;
               paginaLeidos = 1;
+              filtroAnoLeidos = 'todos';
               renderParaLeer();
+              renderFiltroAnosLeidos();
               renderLeidos();
               renderEstadisticas();
               actualizarBadges();
@@ -2404,6 +2485,7 @@
       paginaParaLeer = 1;
       paginaLeidos = 1;
       renderParaLeer();
+      renderFiltroAnosLeidos();
       renderLeidos();
       renderEstadisticas();
       actualizarBadges();
