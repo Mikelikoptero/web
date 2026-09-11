@@ -68,7 +68,8 @@
     main {
       width: 100%;
       max-width: 960px;
-      padding: 0 24px 64px;
+      padding: 0 24px 0;
+      flex: 1;
     }
 
     .selector {
@@ -116,47 +117,6 @@
     .selector button.activo .badge {
       background-color: var(--fondo-tarjeta);
       color: var(--acento);
-    }
-
-    .estado-sync {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 0.75rem;
-      color: var(--texto-suave);
-      margin-bottom: 20px;
-      min-height: 20px;
-      transition: opacity 0.3s ease;
-    }
-
-    .estado-sync .punto {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: var(--texto-suave);
-      opacity: 0.4;
-    }
-
-    .estado-sync.ok .punto {
-      background-color: #4caf50;
-      opacity: 1;
-    }
-
-    .estado-sync.error .punto {
-      background-color: #d32f2f;
-      opacity: 1;
-    }
-
-    .estado-sync.sincronizando .punto {
-      background-color: #ff9800;
-      opacity: 1;
-      animation: pulso 1s infinite;
-    }
-
-    @keyframes pulso {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
     }
 
     .fila-entrada {
@@ -646,6 +606,58 @@
       padding: 4px 0;
     }
 
+    /* Paginación */
+    .paginacion {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 20px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .paginacion button {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      background-color: var(--fondo-tarjeta);
+      color: var(--texto-suave);
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .paginacion button:hover:not(:disabled) {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+    }
+
+    .paginacion button.activo {
+      background-color: var(--acento);
+      color: var(--fondo-tarjeta);
+      border-color: var(--acento);
+      font-weight: 600;
+    }
+
+    .paginacion button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .paginacion .puntos {
+      color: var(--texto-suave);
+      padding: 0 4px;
+      user-select: none;
+    }
+
     .estadisticas-container {
       margin-bottom: 24px;
     }
@@ -964,6 +976,52 @@
       padding: 24px;
       font-size: 0.8rem;
       color: var(--texto-suave);
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Estado de sincronización (al final) */
+    .estado-sync {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.7rem;
+      color: var(--texto-suave);
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+    }
+
+    .estado-sync .punto {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--texto-suave);
+      opacity: 0.4;
+    }
+
+    .estado-sync.ok .punto {
+      background-color: #4caf50;
+      opacity: 1;
+    }
+
+    .estado-sync.error .punto {
+      background-color: #d32f2f;
+      opacity: 1;
+    }
+
+    .estado-sync.sincronizando .punto {
+      background-color: #ff9800;
+      opacity: 1;
+      animation: pulso 1s infinite;
+    }
+
+    @keyframes pulso {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
     }
 
     @keyframes fadeIn {
@@ -973,7 +1031,7 @@
 
     @media (max-width: 768px) {
       main {
-        padding: 0 16px 40px;
+        padding: 0 16px 0;
       }
 
       header {
@@ -1090,6 +1148,13 @@
       .cita-area .cita-input-area input {
         flex: 1 1 100%;
       }
+
+      .paginacion button {
+        min-width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
+        padding: 0 6px;
+      }
     }
   </style>
 </head>
@@ -1110,11 +1175,6 @@
       <button id="tab-estadisticas" type="button">Estadísticas</button>
     </div>
 
-    <div class="estado-sync" id="estado-sync">
-      <span class="punto"></span>
-      <span id="estado-sync-texto">Cargando datos desde la nube...</span>
-    </div>
-
     <div id="vista-para-leer">
       <div class="fila-entrada">
         <input id="input-titulo" type="text" placeholder="Título" autocomplete="off">
@@ -1127,6 +1187,7 @@
         </button>
       </div>
       <div id="lista-para-leer"></div>
+      <div class="paginacion" id="paginacion-para-leer"></div>
     </div>
 
     <div id="vista-leidos" class="oculto">
@@ -1144,6 +1205,7 @@
         <input id="busqueda-leidos" type="text" placeholder="Buscar libro o autor..." autocomplete="off">
       </div>
       <div id="lista-leidos"></div>
+      <div class="paginacion" id="paginacion-leidos"></div>
     </div>
 
     <div id="vista-estadisticas" class="oculto">
@@ -1159,22 +1221,27 @@
 
   <footer>
     <p>Web personal</p>
+    <div class="estado-sync" id="estado-sync">
+      <span class="punto"></span>
+      <span id="estado-sync-texto">Cargando datos desde la nube...</span>
+    </div>
   </footer>
 
   <script>
     // ============================================================
     // CONFIGURACIÓN DE JSONBIN
     // ============================================================
-    var JSONBIN_BIN_ID = "6aa3dbfeac6210605ac03463"; // <-- PEGA AQUÍ TU BIN ID
-    var JSONBIN_MASTER_KEY = "$2a$10$xo8Ir.88S4dIk8hr90gpvum/5a5hG4K4VvV4xX3AvSilvZKMmO5Yy"; // <-- PEGA AQUÍ TU MASTER KEY
+    var JSONBIN_BIN_ID = "TU_BIN_ID_AQUI"; // <-- PEGA AQUÍ TU BIN ID
+    var JSONBIN_MASTER_KEY = "TU_MASTER_KEY_AQUI"; // <-- PEGA AQUÍ TU MASTER KEY
 
     var JSONBIN_URL = "https://api.jsonbin.io/v3/b/" + JSONBIN_BIN_ID;
 
     // ============================================================
-    // CLAVES LOCALSTORAGE
+    // CLAVES Y CONSTANTES
     // ============================================================
     var CLAVE_PARA_LEER = "librosParaLeer";
     var CLAVE_LEIDOS = "librosLeidos";
+    var LIBROS_POR_PAGINA = 20;
 
     // ============================================================
     // REFERENCIAS DOM
@@ -1184,6 +1251,8 @@
     var botonAnadir = document.getElementById("boton-anadir");
     var listaParaLeer = document.getElementById("lista-para-leer");
     var listaLeidos = document.getElementById("lista-leidos");
+    var paginacionParaLeer = document.getElementById("paginacion-para-leer");
+    var paginacionLeidos = document.getElementById("paginacion-leidos");
     var estadisticasContainer = document.getElementById("estadisticas-container");
     var tabParaLeer = document.getElementById("tab-para-leer");
     var tabLeidos = document.getElementById("tab-leidos");
@@ -1202,6 +1271,8 @@
 
     var direccionAscendenteLeidos = false;
     var filtroAno = 'todos';
+    var paginaParaLeer = 1;
+    var paginaLeidos = 1;
 
     // ============================================================
     // UTILIDADES
@@ -1284,7 +1355,6 @@
           guardar(CLAVE_LEIDOS, datos.leidos || []);
           mostrarEstadoSync("ok", "Datos sincronizados");
         } else {
-          // Bin vacío o con formato antiguo: subimos los datos locales
           await guardarEnNube();
           mostrarEstadoSync("ok", "Datos iniciales subidos");
         }
@@ -1350,12 +1420,9 @@
       svg.style.width = "12px";
       svg.style.height = "12px";
       var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      rect.setAttribute("x", "3");
-      rect.setAttribute("y", "4");
-      rect.setAttribute("width", "18");
-      rect.setAttribute("height", "18");
-      rect.setAttribute("rx", "2");
-      rect.setAttribute("ry", "2");
+      rect.setAttribute("x", "3"); rect.setAttribute("y", "4");
+      rect.setAttribute("width", "18"); rect.setAttribute("height", "18");
+      rect.setAttribute("rx", "2"); rect.setAttribute("ry", "2");
       svg.appendChild(rect);
       var line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
       line1.setAttribute("x1", "16"); line1.setAttribute("y1", "2");
@@ -1743,6 +1810,9 @@
       paraLeer.splice(indice, 1);
       guardar(CLAVE_PARA_LEER, paraLeer);
       guardarEnNube();
+      // Ajustar la página si era la última
+      var totalPaginas = Math.ceil(paraLeer.length / LIBROS_POR_PAGINA) || 1;
+      if (paginaParaLeer > totalPaginas) paginaParaLeer = totalPaginas;
       renderParaLeer();
       actualizarBadges();
     }
@@ -1811,17 +1881,80 @@
     }
 
     // ============================================================
+    // PAGINACIÓN
+    // ============================================================
+    function renderPaginacion(contenedor, totalItems, paginaActual, alCambiarPagina) {
+      contenedor.innerHTML = '';
+      var totalPaginas = Math.ceil(totalItems / LIBROS_POR_PAGINA);
+      if (totalPaginas <= 1) return;
+
+      function crearBoton(texto, pagina, activo, disabled) {
+        var btn = document.createElement("button");
+        btn.textContent = texto;
+        btn.type = "button";
+        if (activo) btn.classList.add("activo");
+        if (disabled) btn.disabled = true;
+        if (!disabled && !activo) {
+          btn.addEventListener("click", function() {
+            alCambiarPagina(pagina);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }
+        return btn;
+      }
+
+      // Botón anterior
+      contenedor.appendChild(crearBoton("‹", paginaActual - 1, false, paginaActual === 1));
+
+      // Páginas
+      var paginas = [];
+      for (var i = 1; i <= totalPaginas; i++) {
+        if (i === 1 || i === totalPaginas || Math.abs(i - paginaActual) <= 1) {
+          paginas.push(i);
+        }
+      }
+
+      var ultimaPagina = 0;
+      paginas.forEach(function(p) {
+        if (ultimaPagina && p - ultimaPagina > 1) {
+          var puntos = document.createElement("span");
+          puntos.className = "puntos";
+          puntos.textContent = "...";
+          contenedor.appendChild(puntos);
+        }
+        contenedor.appendChild(crearBoton(p.toString(), p, p === paginaActual, false));
+        ultimaPagina = p;
+      });
+
+      // Botón siguiente
+      contenedor.appendChild(crearBoton("›", paginaActual + 1, false, paginaActual === totalPaginas));
+    }
+
+    // ============================================================
     // RENDER
     // ============================================================
     function renderParaLeer() {
       var libros = cargar(CLAVE_PARA_LEER);
       listaParaLeer.innerHTML = "";
+
       if (libros.length === 0) {
         listaParaLeer.appendChild(mensajeVacio("Todavía no hay libros en la lista."));
+        paginacionParaLeer.innerHTML = '';
         actualizarBadges();
         return;
       }
-      libros.forEach(function (libro, indice) {
+
+      // Calcular paginación
+      var totalPaginas = Math.ceil(libros.length / LIBROS_POR_PAGINA);
+      if (paginaParaLeer > totalPaginas) paginaParaLeer = totalPaginas;
+      if (paginaParaLeer < 1) paginaParaLeer = 1;
+
+      var inicio = (paginaParaLeer - 1) * LIBROS_POR_PAGINA;
+      var fin = inicio + LIBROS_POR_PAGINA;
+      var librosPagina = libros.slice(inicio, fin);
+
+      librosPagina.forEach(function (libro, idx) {
+        var indice = inicio + idx; // índice real en el array completo
         var fila = document.createElement("div");
         fila.className = "libro";
         fila.setAttribute("data-indice", indice);
@@ -1856,6 +1989,13 @@
 
         listaParaLeer.appendChild(fila);
       });
+
+      // Renderizar paginación
+      renderPaginacion(paginacionParaLeer, libros.length, paginaParaLeer, function(nuevaPagina) {
+        paginaParaLeer = nuevaPagina;
+        renderParaLeer();
+      });
+
       actualizarBadges();
     }
 
@@ -1868,14 +2008,25 @@
       var librosFiltrados = filtrarLibrosPorBusqueda(librosOrdenados, busquedaLeidos.value);
 
       listaLeidos.innerHTML = "";
+
       if (librosFiltrados.length === 0) {
         var mensaje = libros.length === 0 ? "Todavía no hay libros leídos." : "No hay libros que coincidan con la búsqueda.";
         listaLeidos.appendChild(mensajeVacio(mensaje));
+        paginacionLeidos.innerHTML = '';
         actualizarBadges();
         return;
       }
 
-      librosFiltrados.forEach(function (libro) {
+      // Calcular paginación
+      var totalPaginas = Math.ceil(librosFiltrados.length / LIBROS_POR_PAGINA);
+      if (paginaLeidos > totalPaginas) paginaLeidos = totalPaginas;
+      if (paginaLeidos < 1) paginaLeidos = 1;
+
+      var inicio = (paginaLeidos - 1) * LIBROS_POR_PAGINA;
+      var fin = inicio + LIBROS_POR_PAGINA;
+      var librosPagina = librosFiltrados.slice(inicio, fin);
+
+      librosPagina.forEach(function (libro) {
         var indiceReal = libros.indexOf(libro);
         var fila = document.createElement("div");
         fila.className = "libro";
@@ -1903,6 +2054,13 @@
 
         listaLeidos.appendChild(fila);
       });
+
+      // Renderizar paginación
+      renderPaginacion(paginacionLeidos, librosFiltrados.length, paginaLeidos, function(nuevaPagina) {
+        paginaLeidos = nuevaPagina;
+        renderLeidos();
+      });
+
       actualizarBadges();
     }
 
@@ -2104,6 +2262,8 @@
       inputTitulo.value = "";
       inputAutor.value = "";
       inputTitulo.focus();
+      // Ir a la primera página para ver el libro recién añadido
+      paginaParaLeer = 1;
       renderParaLeer();
       actualizarBadges();
     }
@@ -2119,6 +2279,10 @@
       guardar(CLAVE_PARA_LEER, paraLeer);
       guardar(CLAVE_LEIDOS, leidos);
       guardarEnNube();
+      // Ajustar páginas
+      var totalPaginasParaLeer = Math.ceil(paraLeer.length / LIBROS_POR_PAGINA) || 1;
+      if (paginaParaLeer > totalPaginasParaLeer) paginaParaLeer = totalPaginasParaLeer;
+      paginaLeidos = 1;
       renderParaLeer();
       renderLeidos();
       renderEstadisticas();
@@ -2157,6 +2321,7 @@
     function toggleDirectionLeidos() {
       direccionAscendenteLeidos = !direccionAscendenteLeidos;
       ordenDirectionLeidos.textContent = direccionAscendenteLeidos ? "Ascendente ↑" : "Descendente ↓";
+      paginaLeidos = 1;
       renderLeidos();
     }
 
@@ -2192,6 +2357,8 @@
               guardar(CLAVE_PARA_LEER, datos.paraLeer);
               guardar(CLAVE_LEIDOS, datos.leidos);
               guardarEnNube();
+              paginaParaLeer = 1;
+              paginaLeidos = 1;
               renderParaLeer();
               renderLeidos();
               renderEstadisticas();
@@ -2219,8 +2386,14 @@
     tabLeidos.addEventListener("click", mostrarLeidos);
     tabEstadisticas.addEventListener("click", mostrarEstadisticas);
     ordenDirectionLeidos.addEventListener("click", toggleDirectionLeidos);
-    ordenCampoLeidos.addEventListener("change", renderLeidos);
-    busquedaLeidos.addEventListener("input", renderLeidos);
+    ordenCampoLeidos.addEventListener("change", function() {
+      paginaLeidos = 1;
+      renderLeidos();
+    });
+    busquedaLeidos.addEventListener("input", function() {
+      paginaLeidos = 1;
+      renderLeidos();
+    });
     btnExportar.addEventListener("click", exportarDatos);
     btnImportar.addEventListener("click", function() { inputArchivo.click(); });
     inputArchivo.addEventListener("change", importarDatos);
@@ -2228,6 +2401,8 @@
     // Cargar desde la nube al iniciar
     (async function init() {
       await cargarDesdeNube();
+      paginaParaLeer = 1;
+      paginaLeidos = 1;
       renderParaLeer();
       renderLeidos();
       renderEstadisticas();
