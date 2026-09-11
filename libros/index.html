@@ -118,6 +118,47 @@
       color: var(--acento);
     }
 
+    .estado-sync {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--texto-suave);
+      margin-bottom: 20px;
+      min-height: 20px;
+      transition: opacity 0.3s ease;
+    }
+
+    .estado-sync .punto {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--texto-suave);
+      opacity: 0.4;
+    }
+
+    .estado-sync.ok .punto {
+      background-color: #4caf50;
+      opacity: 1;
+    }
+
+    .estado-sync.error .punto {
+      background-color: #d32f2f;
+      opacity: 1;
+    }
+
+    .estado-sync.sincronizando .punto {
+      background-color: #ff9800;
+      opacity: 1;
+      animation: pulso 1s infinite;
+    }
+
+    @keyframes pulso {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
     .fila-entrada {
       display: flex;
       gap: 10px;
@@ -280,15 +321,6 @@
 
     .libro .fecha .editor-fecha input[type="date"]:focus {
       border-color: var(--acento);
-    }
-
-    .libro .fecha .editor-fecha input[type="date"]::-webkit-calendar-picker-indicator {
-      opacity: 0.6;
-      cursor: pointer;
-    }
-
-    .libro .fecha .editor-fecha input[type="date"]:hover::-webkit-calendar-picker-indicator {
-      opacity: 1;
     }
 
     .libro .fecha .editor-fecha .boton-fecha-pequeno {
@@ -498,7 +530,6 @@
       opacity: 0.5;
     }
 
-    /* Área de citas */
     .cita-area {
       display: none;
       margin-top: 12px;
@@ -615,7 +646,6 @@
       padding: 4px 0;
     }
 
-    /* Estadísticas */
     .estadisticas-container {
       margin-bottom: 24px;
     }
@@ -752,13 +782,6 @@
       letter-spacing: 0.3px;
     }
 
-    .grafico-mensual .sin-datos {
-      color: var(--texto-suave);
-      font-size: 0.9rem;
-      text-align: center;
-      padding: 20px 0;
-    }
-
     .grafico-lineas {
       background-color: var(--fondo-tarjeta);
       border: 1px solid var(--borde);
@@ -803,13 +826,6 @@
       width: 20px;
       height: 3px;
       border-radius: 2px;
-    }
-
-    .grafico-lineas .sin-datos {
-      color: var(--texto-suave);
-      font-size: 0.9rem;
-      text-align: center;
-      padding: 20px 0;
     }
 
     .lista-vacia {
@@ -1094,6 +1110,11 @@
       <button id="tab-estadisticas" type="button">Estadísticas</button>
     </div>
 
+    <div class="estado-sync" id="estado-sync">
+      <span class="punto"></span>
+      <span id="estado-sync-texto">Cargando datos desde la nube...</span>
+    </div>
+
     <div id="vista-para-leer">
       <div class="fila-entrada">
         <input id="input-titulo" type="text" placeholder="Título" autocomplete="off">
@@ -1141,9 +1162,23 @@
   </footer>
 
   <script>
+    // ============================================================
+    // CONFIGURACIÓN DE JSONBIN
+    // ============================================================
+    var JSONBIN_BIN_ID = "6aa3dbfeac6210605ac03463"; // <-- PEGA AQUÍ TU BIN ID
+    var JSONBIN_MASTER_KEY = "$2a$10$xo8Ir.88S4dIk8hr90gpvum/5a5hG4K4VvV4xX3AvSilvZKMmO5Yy"; // <-- PEGA AQUÍ TU MASTER KEY
+
+    var JSONBIN_URL = "https://api.jsonbin.io/v3/b/" + JSONBIN_BIN_ID;
+
+    // ============================================================
+    // CLAVES LOCALSTORAGE
+    // ============================================================
     var CLAVE_PARA_LEER = "librosParaLeer";
     var CLAVE_LEIDOS = "librosLeidos";
 
+    // ============================================================
+    // REFERENCIAS DOM
+    // ============================================================
     var inputTitulo = document.getElementById("input-titulo");
     var inputAutor = document.getElementById("input-autor");
     var botonAnadir = document.getElementById("boton-anadir");
@@ -1162,10 +1197,15 @@
     var ordenCampoLeidos = document.getElementById("orden-campo-leidos");
     var ordenDirectionLeidos = document.getElementById("orden-direction-leidos");
     var busquedaLeidos = document.getElementById("busqueda-leidos");
+    var estadoSync = document.getElementById("estado-sync");
+    var estadoSyncTexto = document.getElementById("estado-sync-texto");
 
     var direccionAscendenteLeidos = false;
     var filtroAno = 'todos';
 
+    // ============================================================
+    // UTILIDADES
+    // ============================================================
     function cargar(clave) {
       try {
         return JSON.parse(localStorage.getItem(clave)) || [];
@@ -1176,6 +1216,11 @@
 
     function guardar(clave, datos) {
       localStorage.setItem(clave, JSON.stringify(datos));
+    }
+
+    function mostrarEstadoSync(estado, mensaje) {
+      estadoSync.className = "estado-sync " + estado;
+      estadoSyncTexto.textContent = mensaje;
     }
 
     function obtenerFechaActual() {
@@ -1198,18 +1243,14 @@
     function obtenerAnio(fecha) {
       if (!fecha) return null;
       var partes = fecha.split('-');
-      if (partes.length === 3) {
-        return parseInt(partes[0]);
-      }
+      if (partes.length === 3) return parseInt(partes[0]);
       return null;
     }
 
     function obtenerMes(fecha) {
       if (!fecha) return null;
       var partes = fecha.split('-');
-      if (partes.length === 3) {
-        return parseInt(partes[1]);
-      }
+      if (partes.length === 3) return parseInt(partes[1]);
       return null;
     }
 
@@ -1220,6 +1261,70 @@
       document.getElementById('badge-leidos').textContent = leidos.length;
     }
 
+    // ============================================================
+    // SINCRONIZACIÓN CON JSONBIN
+    // ============================================================
+    async function cargarDesdeNube() {
+      mostrarEstadoSync("sincronizando", "Cargando datos desde la nube...");
+
+      try {
+        var response = await fetch(JSONBIN_URL + "/latest", {
+          headers: {
+            "X-Master-Key": JSONBIN_MASTER_KEY
+          }
+        });
+
+        if (!response.ok) throw new Error("Error HTTP: " + response.status);
+
+        var result = await response.json();
+        var datos = result.record;
+
+        if (datos && (datos.paraLeer !== undefined || datos.leidos !== undefined)) {
+          guardar(CLAVE_PARA_LEER, datos.paraLeer || []);
+          guardar(CLAVE_LEIDOS, datos.leidos || []);
+          mostrarEstadoSync("ok", "Datos sincronizados");
+        } else {
+          // Bin vacío o con formato antiguo: subimos los datos locales
+          await guardarEnNube();
+          mostrarEstadoSync("ok", "Datos iniciales subidos");
+        }
+      } catch (error) {
+        console.error("Error al cargar desde JSONBin:", error);
+        mostrarEstadoSync("error", "Sin conexión - usando datos locales");
+      }
+    }
+
+    async function guardarEnNube() {
+      var datosParaGuardar = {
+        paraLeer: cargar(CLAVE_PARA_LEER),
+        leidos: cargar(CLAVE_LEIDOS),
+        ultimaActualizacion: new Date().toISOString()
+      };
+
+      mostrarEstadoSync("sincronizando", "Guardando en la nube...");
+
+      try {
+        var response = await fetch(JSONBIN_URL, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": JSONBIN_MASTER_KEY
+          },
+          body: JSON.stringify(datosParaGuardar)
+        });
+
+        if (!response.ok) throw new Error("Error HTTP: " + response.status);
+
+        mostrarEstadoSync("ok", "Sincronizado " + new Date().toLocaleTimeString());
+      } catch (error) {
+        console.error("Error al guardar en JSONBin:", error);
+        mostrarEstadoSync("error", "Error al guardar - datos guardados localmente");
+      }
+    }
+
+    // ============================================================
+    // SVG HELPERS
+    // ============================================================
     function svgTick() {
       var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       svg.setAttribute("viewBox", "0 0 24 24");
@@ -1244,7 +1349,6 @@
       svg.setAttribute("stroke-linejoin", "round");
       svg.style.width = "12px";
       svg.style.height = "12px";
-      
       var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       rect.setAttribute("x", "3");
       rect.setAttribute("y", "4");
@@ -1253,28 +1357,18 @@
       rect.setAttribute("rx", "2");
       rect.setAttribute("ry", "2");
       svg.appendChild(rect);
-      
       var line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line1.setAttribute("x1", "16");
-      line1.setAttribute("y1", "2");
-      line1.setAttribute("x2", "16");
-      line1.setAttribute("y2", "6");
+      line1.setAttribute("x1", "16"); line1.setAttribute("y1", "2");
+      line1.setAttribute("x2", "16"); line1.setAttribute("y2", "6");
       svg.appendChild(line1);
-      
       var line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line2.setAttribute("x1", "8");
-      line2.setAttribute("y1", "2");
-      line2.setAttribute("x2", "8");
-      line2.setAttribute("y2", "6");
+      line2.setAttribute("x1", "8"); line2.setAttribute("y1", "2");
+      line2.setAttribute("x2", "8"); line2.setAttribute("y2", "6");
       svg.appendChild(line2);
-      
       var line3 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line3.setAttribute("x1", "3");
-      line3.setAttribute("y1", "10");
-      line3.setAttribute("x2", "21");
-      line3.setAttribute("y2", "10");
+      line3.setAttribute("x1", "3"); line3.setAttribute("y1", "10");
+      line3.setAttribute("x2", "21"); line3.setAttribute("y2", "10");
       svg.appendChild(line3);
-      
       return svg;
     }
 
@@ -1286,15 +1380,12 @@
       svg.setAttribute("stroke-width", "2");
       svg.setAttribute("stroke-linecap", "round");
       svg.setAttribute("stroke-linejoin", "round");
-      
       var path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path1.setAttribute("d", "M12 20h9");
       svg.appendChild(path1);
-      
       var path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path2.setAttribute("d", "M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z");
       svg.appendChild(path2);
-      
       return svg;
     }
 
@@ -1306,29 +1397,20 @@
       svg.setAttribute("stroke-width", "2");
       svg.setAttribute("stroke-linecap", "round");
       svg.setAttribute("stroke-linejoin", "round");
-      
       var path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path1.setAttribute("d", "M10 11h-4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1z");
       svg.appendChild(path1);
-      
       var path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path2.setAttribute("d", "M19 11h-4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1z");
       svg.appendChild(path2);
-      
       var line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line1.setAttribute("x1", "5");
-      line1.setAttribute("y1", "15");
-      line1.setAttribute("x2", "19");
-      line1.setAttribute("y2", "15");
+      line1.setAttribute("x1", "5"); line1.setAttribute("y1", "15");
+      line1.setAttribute("x2", "19"); line1.setAttribute("y2", "15");
       svg.appendChild(line1);
-      
       var line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line2.setAttribute("x1", "5");
-      line2.setAttribute("y1", "18");
-      line2.setAttribute("x2", "19");
-      line2.setAttribute("y2", "18");
+      line2.setAttribute("x1", "5"); line2.setAttribute("y1", "18");
+      line2.setAttribute("x2", "19"); line2.setAttribute("y2", "18");
       svg.appendChild(line2);
-      
       return svg;
     }
 
@@ -1340,63 +1422,31 @@
       svg.setAttribute("stroke-width", "2");
       svg.setAttribute("stroke-linecap", "round");
       svg.setAttribute("stroke-linejoin", "round");
-      
       var line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line1.setAttribute("x1", "18");
-      line1.setAttribute("y1", "6");
-      line1.setAttribute("x2", "6");
-      line1.setAttribute("y2", "18");
+      line1.setAttribute("x1", "18"); line1.setAttribute("y1", "6");
+      line1.setAttribute("x2", "6"); line1.setAttribute("y2", "18");
       svg.appendChild(line1);
-      
       var line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line2.setAttribute("x1", "6");
-      line2.setAttribute("y1", "6");
-      line2.setAttribute("x2", "18");
-      line2.setAttribute("y2", "18");
+      line2.setAttribute("x1", "6"); line2.setAttribute("y1", "6");
+      line2.setAttribute("x2", "18"); line2.setAttribute("y2", "18");
       svg.appendChild(line2);
-      
       return svg;
     }
 
-    function svgPlus() {
-      var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svg.setAttribute("viewBox", "0 0 24 24");
-      svg.setAttribute("fill", "none");
-      svg.setAttribute("stroke", "currentColor");
-      svg.setAttribute("stroke-width", "2");
-      svg.setAttribute("stroke-linecap", "round");
-      
-      var line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line1.setAttribute("x1", "12");
-      line1.setAttribute("y1", "5");
-      line1.setAttribute("x2", "12");
-      line1.setAttribute("y2", "19");
-      svg.appendChild(line1);
-      
-      var line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line2.setAttribute("x1", "5");
-      line2.setAttribute("y1", "12");
-      line2.setAttribute("x2", "19");
-      line2.setAttribute("y2", "12");
-      svg.appendChild(line2);
-      
-      return svg;
-    }
-
+    // ============================================================
+    // CREACIÓN DE ELEMENTOS
+    // ============================================================
     function crearInfoLibro(libro) {
       var div = document.createElement("div");
       div.className = "info";
-
       var titulo = document.createElement("div");
       titulo.className = "titulo";
       titulo.textContent = libro.titulo || "Sin título";
       div.appendChild(titulo);
-
       var autor = document.createElement("div");
       autor.className = "autor";
       autor.textContent = libro.autor || "Autor desconocido";
       div.appendChild(autor);
-
       return div;
     }
 
@@ -1410,34 +1460,24 @@
     function crearEstrellas(libro, indice) {
       var contenedor = document.createElement("div");
       contenedor.className = "estrellas";
-
-      if (typeof libro.puntuacion === 'undefined') {
-        libro.puntuacion = 0;
-      }
-
+      if (typeof libro.puntuacion === 'undefined') libro.puntuacion = 0;
       for (var i = 1; i <= 5; i++) {
         var btn = document.createElement("button");
         btn.className = "estrella-btn" + (i <= libro.puntuacion ? " activa" : "");
         btn.textContent = "★";
         btn.type = "button";
         btn.setAttribute("aria-label", "Puntuación " + i + " estrellas");
-        
-        btn.addEventListener("click", function(estrellaIndex) {
-          return function() {
-            actualizarPuntuacion(indice, estrellaIndex);
-          };
-        }(i));
-
+        btn.addEventListener("click", (function(estrellaIndex) {
+          return function() { actualizarPuntuacion(indice, estrellaIndex); };
+        })(i));
         contenedor.appendChild(btn);
       }
-
       return contenedor;
     }
 
     function crearFechaLeido(libro, indice) {
       var contenedor = document.createElement("div");
       contenedor.className = "fecha";
-
       var textoFecha = document.createElement("span");
       if (libro.fecha) {
         textoFecha.textContent = formatearFecha(libro.fecha);
@@ -1451,7 +1491,6 @@
       botonEditar.className = "boton-editar-fecha";
       botonEditar.type = "button";
       botonEditar.title = "Editar fecha";
-      botonEditar.setAttribute("aria-label", "Editar fecha");
       botonEditar.appendChild(svgCalendar());
       contenedor.appendChild(botonEditar);
 
@@ -1461,139 +1500,89 @@
       var input = document.createElement("input");
       input.type = "date";
       input.value = libro.fecha || '';
-      input.setAttribute("aria-label", "Fecha de finalización");
-      
       var botonHoy = document.createElement("button");
       botonHoy.className = "boton-fecha-pequeno";
       botonHoy.textContent = "Hoy";
       botonHoy.type = "button";
-      
-      if (libro.fecha === obtenerFechaActual()) {
-        botonHoy.classList.add("activo");
-      }
-      
+      if (libro.fecha === obtenerFechaActual()) botonHoy.classList.add("activo");
       var botonGuardar = document.createElement("button");
       botonGuardar.className = "boton-fecha-pequeno";
       botonGuardar.textContent = "Guardar";
       botonGuardar.type = "button";
-
       var botonCancelar = document.createElement("button");
       botonCancelar.className = "boton-fecha-pequeno";
       botonCancelar.textContent = "×";
       botonCancelar.type = "button";
-      botonCancelar.setAttribute("aria-label", "Cancelar");
 
       editor.appendChild(input);
       editor.appendChild(botonHoy);
       editor.appendChild(botonGuardar);
       editor.appendChild(botonCancelar);
-
       contenedor.appendChild(editor);
 
-      function mostrarEditor() {
-        contenedor.querySelector('.editor-fecha').classList.add('visible');
-        input.focus();
-      }
-
-      function ocultarEditor() {
-        contenedor.querySelector('.editor-fecha').classList.remove('visible');
-      }
+      function mostrarEditor() { editor.classList.add('visible'); input.focus(); }
+      function ocultarEditor() { editor.classList.remove('visible'); }
 
       function guardarFecha() {
         var fecha = input.value;
         actualizarFecha(indice, fecha);
-        if (fecha === obtenerFechaActual()) {
-          botonHoy.classList.add("activo");
-        } else {
-          botonHoy.classList.remove("activo");
-        }
+        if (fecha === obtenerFechaActual()) botonHoy.classList.add("activo");
+        else botonHoy.classList.remove("activo");
         ocultarEditor();
         var span = contenedor.querySelector('span');
-        if (fecha) {
-          span.textContent = formatearFecha(fecha);
-          span.style.color = "";
-        } else {
-          span.textContent = "Sin fecha";
-          span.style.color = "var(--texto-suave)";
-        }
+        if (fecha) { span.textContent = formatearFecha(fecha); span.style.color = ""; }
+        else { span.textContent = "Sin fecha"; span.style.color = "var(--texto-suave)"; }
       }
 
       botonEditar.addEventListener("click", function(e) {
         e.stopPropagation();
-        if (editor.classList.contains('visible')) {
-          ocultarEditor();
-        } else {
-          mostrarEditor();
-        }
+        if (editor.classList.contains('visible')) ocultarEditor();
+        else mostrarEditor();
       });
-
-      botonGuardar.addEventListener("click", function(e) {
-        e.stopPropagation();
-        guardarFecha();
-      });
-
-      botonCancelar.addEventListener("click", function(e) {
-        e.stopPropagation();
-        ocultarEditor();
-      });
-
+      botonGuardar.addEventListener("click", function(e) { e.stopPropagation(); guardarFecha(); });
+      botonCancelar.addEventListener("click", function(e) { e.stopPropagation(); ocultarEditor(); });
       botonHoy.addEventListener("click", function(e) {
         e.stopPropagation();
-        var fechaHoy = obtenerFechaActual();
-        input.value = fechaHoy;
+        input.value = obtenerFechaActual();
         this.classList.add("activo");
       });
-
       input.addEventListener("keydown", function(e) {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          guardarFecha();
-        }
-        if (e.key === "Escape") {
-          ocultarEditor();
-        }
+        if (e.key === "Enter") { e.preventDefault(); guardarFecha(); }
+        if (e.key === "Escape") ocultarEditor();
       });
-
       document.addEventListener("click", function(e) {
-        if (!contenedor.contains(e.target)) {
-          ocultarEditor();
-        }
+        if (!contenedor.contains(e.target)) ocultarEditor();
       });
 
       return contenedor;
     }
 
-    function crearNota(libro, indice) {
+    function crearNota(libro, indice, esLeido) {
       var contenedor = document.createElement("div");
       contenedor.className = "nota-area";
-      
       var textarea = document.createElement("textarea");
       textarea.value = libro.nota || '';
       textarea.placeholder = "Escribe aquí tus anotaciones...";
-      textarea.setAttribute("data-indice", indice);
-      
       textarea.addEventListener("input", function() {
-        var idx = parseInt(this.getAttribute("data-indice"));
-        var lista = cargar(CLAVE_PARA_LEER);
-        if (lista[idx]) {
-          lista[idx].nota = this.value;
-          guardar(CLAVE_PARA_LEER, lista);
+        var lista = esLeido ? cargar(CLAVE_LEIDOS) : cargar(CLAVE_PARA_LEER);
+        if (lista[indice]) {
+          lista[indice].nota = this.value;
+          if (esLeido) guardar(CLAVE_LEIDOS, lista);
+          else guardar(CLAVE_PARA_LEER, lista);
         }
       });
-
+      textarea.addEventListener("blur", function() { guardarEnNube(); });
       contenedor.appendChild(textarea);
       return contenedor;
     }
 
-    // ===== FUNCIONES PARA CITAS =====
-    function crearCitasParaLeer(libro, indice) {
+    function crearCitas(libro, indice, esLeido) {
       var contenedor = document.createElement("div");
       contenedor.className = "cita-area";
-      
-      // Lista de citas
+
       var lista = document.createElement("div");
       lista.className = "cita-lista";
-      
+
       var citas = libro.citas || [];
       if (citas.length === 0) {
         var sinCitas = document.createElement("div");
@@ -1604,63 +1593,57 @@
         citas.forEach(function(cita, citaIdx) {
           var item = document.createElement("div");
           item.className = "cita-item";
-          
           var texto = document.createElement("span");
           texto.className = "cita-texto";
           texto.textContent = '"' + cita + '"';
           item.appendChild(texto);
-          
           var eliminar = document.createElement("button");
           eliminar.className = "cita-eliminar";
           eliminar.textContent = "×";
-          eliminar.setAttribute("data-cita-indice", citaIdx);
           eliminar.addEventListener("click", function(e) {
             e.stopPropagation();
-            eliminarCitaParaLeer(indice, citaIdx);
+            eliminarCita(indice, citaIdx, esLeido);
           });
           item.appendChild(eliminar);
-          
           lista.appendChild(item);
         });
       }
-      
       contenedor.appendChild(lista);
-      
-      // Input para añadir nueva cita
+
       var inputArea = document.createElement("div");
       inputArea.className = "cita-input-area";
-      
       var input = document.createElement("input");
       input.type = "text";
       input.placeholder = "Escribe una cita y presiona Enter o el tick...";
-      input.setAttribute("data-indice", indice);
-      
+
       var botonGuardar = document.createElement("button");
       botonGuardar.className = "boton-cita-guardar";
       botonGuardar.type = "button";
       botonGuardar.setAttribute("aria-label", "Guardar cita");
       botonGuardar.appendChild(svgTick());
-      
+
       function guardarCita() {
         var texto = input.value.trim();
         if (texto) {
-          var idx = parseInt(input.getAttribute("data-indice"));
-          var lista = cargar(CLAVE_PARA_LEER);
-          if (lista[idx]) {
-            if (!lista[idx].citas) lista[idx].citas = [];
-            lista[idx].citas.push(texto);
-            guardar(CLAVE_PARA_LEER, lista);
-            input.value = '';
-            renderParaLeer();
-            // Reabrir el área de citas
+          var lista = esLeido ? cargar(CLAVE_LEIDOS) : cargar(CLAVE_PARA_LEER);
+          if (lista[indice]) {
+            if (!lista[indice].citas) lista[indice].citas = [];
+            lista[indice].citas.push(texto);
+            if (esLeido) guardar(CLAVE_LEIDOS, lista);
+            else guardar(CLAVE_PARA_LEER, lista);
+            guardarEnNube();
+            if (esLeido) { renderLeidos(); renderEstadisticas(); }
+            else renderParaLeer();
             setTimeout(function() {
-              var libroElement = document.querySelector('.libro[data-indice="' + idx + '"]');
+              var libroElement = document.querySelector('.libro[data-indice="' + indice + '"]');
               if (libroElement) {
                 var citaArea = libroElement.querySelector('.cita-area');
                 var botonCita = libroElement.querySelector('.boton-cita');
                 if (citaArea && botonCita) {
                   citaArea.classList.add('visible');
                   botonCita.classList.add('abierto');
+                  var nuevoInput = citaArea.querySelector('input');
+                  if (nuevoInput) nuevoInput.focus();
                 }
               }
             }, 50);
@@ -1669,180 +1652,52 @@
           input.focus();
         }
       }
-      
+
       input.addEventListener("keydown", function(e) {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          guardarCita();
-        }
+        if (e.key === "Enter") { e.preventDefault(); guardarCita(); }
       });
-      
-      botonGuardar.addEventListener("click", function(e) {
-        e.stopPropagation();
-        guardarCita();
-      });
-      
+      botonGuardar.addEventListener("click", function(e) { e.stopPropagation(); guardarCita(); });
+
       inputArea.appendChild(input);
       inputArea.appendChild(botonGuardar);
       contenedor.appendChild(inputArea);
-      
+
       return contenedor;
     }
 
-    function eliminarCitaParaLeer(indiceLibro, indiceCita) {
-      var lista = cargar(CLAVE_PARA_LEER);
+    function eliminarCita(indiceLibro, indiceCita, esLeido) {
+      var lista = esLeido ? cargar(CLAVE_LEIDOS) : cargar(CLAVE_PARA_LEER);
       if (lista[indiceLibro] && lista[indiceLibro].citas) {
         lista[indiceLibro].citas.splice(indiceCita, 1);
-        guardar(CLAVE_PARA_LEER, lista);
-        renderParaLeer();
+        if (esLeido) guardar(CLAVE_LEIDOS, lista);
+        else guardar(CLAVE_PARA_LEER, lista);
+        guardarEnNube();
+        if (esLeido) { renderLeidos(); renderEstadisticas(); }
+        else renderParaLeer();
       }
-    }
-
-    function eliminarCitaLeido(indiceLibro, indiceCita) {
-      var lista = cargar(CLAVE_LEIDOS);
-      if (lista[indiceLibro] && lista[indiceLibro].citas) {
-        lista[indiceLibro].citas.splice(indiceCita, 1);
-        guardar(CLAVE_LEIDOS, lista);
-        renderLeidos();
-        renderEstadisticas();
-      }
-    }
-
-    function crearCitasLeido(libro, indice) {
-      var contenedor = document.createElement("div");
-      contenedor.className = "cita-area";
-      
-      var lista = document.createElement("div");
-      lista.className = "cita-lista";
-      
-      var citas = libro.citas || [];
-      if (citas.length === 0) {
-        var sinCitas = document.createElement("div");
-        sinCitas.className = "sin-citas";
-        sinCitas.textContent = "No hay citas para este libro.";
-        lista.appendChild(sinCitas);
-      } else {
-        citas.forEach(function(cita, citaIdx) {
-          var item = document.createElement("div");
-          item.className = "cita-item";
-          
-          var texto = document.createElement("span");
-          texto.className = "cita-texto";
-          texto.textContent = '"' + cita + '"';
-          item.appendChild(texto);
-          
-          var eliminar = document.createElement("button");
-          eliminar.className = "cita-eliminar";
-          eliminar.textContent = "×";
-          eliminar.setAttribute("data-cita-indice", citaIdx);
-          eliminar.addEventListener("click", function(e) {
-            e.stopPropagation();
-            eliminarCitaLeido(indice, citaIdx);
-          });
-          item.appendChild(eliminar);
-          
-          lista.appendChild(item);
-        });
-      }
-      
-      contenedor.appendChild(lista);
-      
-      var inputArea = document.createElement("div");
-      inputArea.className = "cita-input-area";
-      
-      var input = document.createElement("input");
-      input.type = "text";
-      input.placeholder = "Añadir otra cita...";
-      input.setAttribute("data-indice", indice);
-      
-      var botonGuardar = document.createElement("button");
-      botonGuardar.className = "boton-cita-guardar";
-      botonGuardar.type = "button";
-      botonGuardar.setAttribute("aria-label", "Guardar cita");
-      botonGuardar.appendChild(svgTick());
-      
-      function guardarCitaLeido() {
-        var texto = input.value.trim();
-        if (texto) {
-          var idx = parseInt(input.getAttribute("data-indice"));
-          var lista = cargar(CLAVE_LEIDOS);
-          if (lista[idx]) {
-            if (!lista[idx].citas) lista[idx].citas = [];
-            lista[idx].citas.push(texto);
-            guardar(CLAVE_LEIDOS, lista);
-            input.value = '';
-            renderLeidos();
-            renderEstadisticas();
-            setTimeout(function() {
-              var libroElement = document.querySelector('.libro[data-indice="' + idx + '"]');
-              if (libroElement) {
-                var citaArea = libroElement.querySelector('.cita-area');
-                var botonCita = libroElement.querySelector('.boton-cita');
-                if (citaArea && botonCita) {
-                  citaArea.classList.add('visible');
-                  botonCita.classList.add('abierto');
-                }
-              }
-            }, 50);
-          }
-        } else {
-          input.focus();
-        }
-      }
-      
-      input.addEventListener("keydown", function(e) {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          guardarCitaLeido();
-        }
-      });
-      
-      botonGuardar.addEventListener("click", function(e) {
-        e.stopPropagation();
-        guardarCitaLeido();
-      });
-      
-      inputArea.appendChild(input);
-      inputArea.appendChild(botonGuardar);
-      contenedor.appendChild(inputArea);
-      
-      return contenedor;
     }
 
     function crearBotonNota(indice) {
       var boton = document.createElement("button");
       boton.className = "boton-nota";
       boton.type = "button";
-      boton.setAttribute("data-indice", indice);
       boton.title = "Abrir nota";
-      boton.setAttribute("aria-label", "Abrir nota");
       boton.appendChild(svgNote());
-      
       boton.addEventListener("click", function(e) {
         e.stopPropagation();
-        var idx = parseInt(this.getAttribute("data-indice"));
         var libroElement = this.closest('.libro');
         var notaArea = libroElement.querySelector('.nota-area');
         var citaArea = libroElement.querySelector('.cita-area');
         var estaAbierto = notaArea.classList.contains('visible');
-        
-        document.querySelectorAll('.nota-area.visible, .cita-area.visible').forEach(function(el) {
-          el.classList.remove('visible');
-        });
-        document.querySelectorAll('.boton-nota.abierto, .boton-cita.abierto').forEach(function(el) {
-          el.classList.remove('abierto');
-        });
-        
+        document.querySelectorAll('.nota-area.visible, .cita-area.visible').forEach(function(el) { el.classList.remove('visible'); });
+        document.querySelectorAll('.boton-nota.abierto, .boton-cita.abierto').forEach(function(el) { el.classList.remove('abierto'); });
         if (!estaAbierto) {
           notaArea.classList.add('visible');
           this.classList.add('abierto');
-          var textarea = notaArea.querySelector('textarea');
-          if (textarea) {
-            setTimeout(function() { textarea.focus(); }, 50);
-          }
+          var ta = notaArea.querySelector('textarea');
+          if (ta) setTimeout(function() { ta.focus(); }, 50);
         }
       });
-      
       return boton;
     }
 
@@ -1850,36 +1705,23 @@
       var boton = document.createElement("button");
       boton.className = "boton-cita";
       boton.type = "button";
-      boton.setAttribute("data-indice", indice);
       boton.title = "Abrir citas";
-      boton.setAttribute("aria-label", "Abrir citas");
       boton.appendChild(svgQuote());
-      
       boton.addEventListener("click", function(e) {
         e.stopPropagation();
-        var idx = parseInt(this.getAttribute("data-indice"));
         var libroElement = this.closest('.libro');
         var citaArea = libroElement.querySelector('.cita-area');
         var notaArea = libroElement.querySelector('.nota-area');
         var estaAbierto = citaArea.classList.contains('visible');
-        
-        document.querySelectorAll('.nota-area.visible, .cita-area.visible').forEach(function(el) {
-          el.classList.remove('visible');
-        });
-        document.querySelectorAll('.boton-nota.abierto, .boton-cita.abierto').forEach(function(el) {
-          el.classList.remove('abierto');
-        });
-        
+        document.querySelectorAll('.nota-area.visible, .cita-area.visible').forEach(function(el) { el.classList.remove('visible'); });
+        document.querySelectorAll('.boton-nota.abierto, .boton-cita.abierto').forEach(function(el) { el.classList.remove('abierto'); });
         if (!estaAbierto) {
           citaArea.classList.add('visible');
           this.classList.add('abierto');
-          var input = citaArea.querySelector('input');
-          if (input) {
-            setTimeout(function() { input.focus(); }, 50);
-          }
+          var inp = citaArea.querySelector('input');
+          if (inp) setTimeout(function() { inp.focus(); }, 50);
         }
       });
-      
       return boton;
     }
 
@@ -1887,19 +1729,12 @@
       var boton = document.createElement("button");
       boton.className = "boton-eliminar";
       boton.type = "button";
-      boton.setAttribute("data-indice", indice);
       boton.title = "Eliminar libro";
-      boton.setAttribute("aria-label", "Eliminar libro");
       boton.appendChild(svgClose());
-      
       boton.addEventListener("click", function(e) {
         e.stopPropagation();
-        var idx = parseInt(this.getAttribute("data-indice"));
-        if (confirm("¿Eliminar este libro de la lista?")) {
-          eliminarLibroParaLeer(idx);
-        }
+        if (confirm("¿Eliminar este libro de la lista?")) eliminarLibroParaLeer(indice);
       });
-      
       return boton;
     }
 
@@ -1907,15 +1742,20 @@
       var paraLeer = cargar(CLAVE_PARA_LEER);
       paraLeer.splice(indice, 1);
       guardar(CLAVE_PARA_LEER, paraLeer);
+      guardarEnNube();
       renderParaLeer();
       actualizarBadges();
     }
 
+    // ============================================================
+    // ACTUALIZAR DATOS
+    // ============================================================
     function actualizarPuntuacion(indice, puntuacion) {
       var leidos = cargar(CLAVE_LEIDOS);
       if (leidos[indice]) {
         leidos[indice].puntuacion = puntuacion;
         guardar(CLAVE_LEIDOS, leidos);
+        guardarEnNube();
         renderLeidos();
         renderEstadisticas();
         actualizarBadges();
@@ -1927,40 +1767,36 @@
       if (leidos[indice]) {
         leidos[indice].fecha = fecha;
         guardar(CLAVE_LEIDOS, leidos);
+        guardarEnNube();
         renderLeidos();
         renderEstadisticas();
         actualizarBadges();
       }
     }
 
+    // ============================================================
+    // ORDENAR Y FILTRAR
+    // ============================================================
     function ordenarLibros(libros, campo, ascendente) {
       var copia = libros.slice();
-      
       copia.sort(function(a, b) {
         var valorA, valorB;
-        
         if (campo === 'fecha') {
-          valorA = a.fecha || '';
-          valorB = b.fecha || '';
+          valorA = a.fecha || ''; valorB = b.fecha || '';
           if (valorA === '' && valorB === '') return 0;
           if (valorA === '') return 1;
           if (valorB === '') return -1;
         } else if (campo === 'titulo') {
-          valorA = (a.titulo || '').toLowerCase();
-          valorB = (b.titulo || '').toLowerCase();
+          valorA = (a.titulo || '').toLowerCase(); valorB = (b.titulo || '').toLowerCase();
         } else if (campo === 'autor') {
-          valorA = (a.autor || '').toLowerCase();
-          valorB = (b.autor || '').toLowerCase();
+          valorA = (a.autor || '').toLowerCase(); valorB = (b.autor || '').toLowerCase();
         } else if (campo === 'puntuacion') {
-          valorA = a.puntuacion || 0;
-          valorB = b.puntuacion || 0;
+          valorA = a.puntuacion || 0; valorB = b.puntuacion || 0;
         }
-        
         if (valorA < valorB) return ascendente ? -1 : 1;
         if (valorA > valorB) return ascendente ? 1 : -1;
         return 0;
       });
-      
       return copia;
     }
 
@@ -1970,10 +1806,13 @@
       return libros.filter(function(libro) {
         var titulo = (libro.titulo || '').toLowerCase();
         var autor = (libro.autor || '').toLowerCase();
-        return titulo.includes(termino) || autor.includes(termino);
+        return titulo.indexOf(termino) !== -1 || autor.indexOf(termino) !== -1;
       });
     }
 
+    // ============================================================
+    // RENDER
+    // ============================================================
     function renderParaLeer() {
       var libros = cargar(CLAVE_PARA_LEER);
       listaParaLeer.innerHTML = "";
@@ -1986,40 +1825,35 @@
         var fila = document.createElement("div");
         fila.className = "libro";
         fila.setAttribute("data-indice", indice);
-        
+
         var filaPrincipal = document.createElement("div");
         filaPrincipal.className = "fila-principal";
-        
         filaPrincipal.appendChild(crearInfoLibro(libro));
 
         var acciones = document.createElement("div");
         acciones.className = "acciones";
-        
         var filaAcciones = document.createElement("div");
         filaAcciones.className = "fila-acciones";
-        
+
         var tick = document.createElement("button");
         tick.className = "boton-cuadrado";
         tick.type = "button";
         tick.title = "Marcar como leído";
-        tick.setAttribute("aria-label", "Marcar como leído");
         tick.appendChild(svgTick());
-        tick.addEventListener("click", function () {
-          marcarLeido(indice);
-        });
+        tick.addEventListener("click", function () { marcarLeido(indice); });
         filaAcciones.appendChild(tick);
-        
+
         filaAcciones.appendChild(crearBotonNota(indice));
         filaAcciones.appendChild(crearBotonCita(indice));
         filaAcciones.appendChild(crearBotonEliminar(indice));
-        
+
         acciones.appendChild(filaAcciones);
         filaPrincipal.appendChild(acciones);
         fila.appendChild(filaPrincipal);
-        
-        fila.appendChild(crearNota(libro, indice));
-        fila.appendChild(crearCitasParaLeer(libro, indice));
-        
+
+        fila.appendChild(crearNota(libro, indice, false));
+        fila.appendChild(crearCitas(libro, indice, false));
+
         listaParaLeer.appendChild(fila);
       });
       actualizarBadges();
@@ -2029,142 +1863,111 @@
       var libros = cargar(CLAVE_LEIDOS);
       var campo = ordenCampoLeidos.value;
       var ascendente = direccionAscendenteLeidos;
-      
+
       var librosOrdenados = ordenarLibros(libros, campo, ascendente);
-      var textoBusqueda = busquedaLeidos.value;
-      var librosFiltrados = filtrarLibrosPorBusqueda(librosOrdenados, textoBusqueda);
-      
+      var librosFiltrados = filtrarLibrosPorBusqueda(librosOrdenados, busquedaLeidos.value);
+
       listaLeidos.innerHTML = "";
       if (librosFiltrados.length === 0) {
-        var mensaje = "No hay libros que coincidan con la búsqueda.";
-        if (libros.length === 0) {
-          mensaje = "Todavía no hay libros leídos.";
-        }
+        var mensaje = libros.length === 0 ? "Todavía no hay libros leídos." : "No hay libros que coincidan con la búsqueda.";
         listaLeidos.appendChild(mensajeVacio(mensaje));
         actualizarBadges();
         return;
       }
-      
+
       librosFiltrados.forEach(function (libro) {
         var indiceReal = libros.indexOf(libro);
-        
         var fila = document.createElement("div");
         fila.className = "libro";
         fila.setAttribute("data-indice", indiceReal);
-        
+
         var filaPrincipal = document.createElement("div");
         filaPrincipal.className = "fila-principal";
-        
         filaPrincipal.appendChild(crearInfoLibro(libro));
 
         var acciones = document.createElement("div");
         acciones.className = "acciones";
-        
         var filaAcciones = document.createElement("div");
         filaAcciones.className = "fila-acciones";
         filaAcciones.appendChild(crearEstrellas(libro, indiceReal));
         filaAcciones.appendChild(crearFechaLeido(libro, indiceReal));
         filaAcciones.appendChild(crearBotonNota(indiceReal));
         filaAcciones.appendChild(crearBotonCita(indiceReal));
-        
+
         acciones.appendChild(filaAcciones);
         filaPrincipal.appendChild(acciones);
         fila.appendChild(filaPrincipal);
-        
-        fila.appendChild(crearNota(libro, indiceReal));
-        fila.appendChild(crearCitasLeido(libro, indiceReal));
-        
+
+        fila.appendChild(crearNota(libro, indiceReal, true));
+        fila.appendChild(crearCitas(libro, indiceReal, true));
+
         listaLeidos.appendChild(fila);
       });
       actualizarBadges();
     }
 
-    // ===== GRÁFICO MENSUAL (BARRAS) =====
+    // ============================================================
+    // GRÁFICOS
+    // ============================================================
     function renderGraficoMensual(libros, año) {
       var meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
       var librosPorMes = Array(12).fill(0);
-      
       libros.forEach(function(libro) {
         var anio = obtenerAnio(libro.fecha);
         var mes = obtenerMes(libro.fecha);
-        if (anio === año && mes !== null && mes >= 1 && mes <= 12) {
-          librosPorMes[mes - 1]++;
-        }
+        if (anio === año && mes !== null && mes >= 1 && mes <= 12) librosPorMes[mes - 1]++;
       });
-      
       var max = Math.max(1, Math.max.apply(null, librosPorMes));
-      
-      var html = '<div class="grafico-mensual">';
-      html += '<div class="grafico-titulo">Libros leídos por mes - ' + año + '</div>';
-      html += '<div class="barras">';
-      
+      var html = '<div class="grafico-mensual"><div class="grafico-titulo">Libros leídos por mes - ' + año + '</div><div class="barras">';
       for (var i = 0; i < 12; i++) {
         var altura = Math.max(4, (librosPorMes[i] / max) * 140);
-        var valor = librosPorMes[i];
-        html += '<div class="barra-item">';
-        html += '<div class="barra" style="height:' + altura + 'px;">';
-        if (valor > 0) {
-          html += '<span class="barra-valor">' + valor + '</span>';
-        }
-        html += '</div>';
-        html += '<span class="mes-label">' + meses[i] + '</span>';
-        html += '</div>';
+        html += '<div class="barra-item"><div class="barra" style="height:' + altura + 'px;">';
+        if (librosPorMes[i] > 0) html += '<span class="barra-valor">' + librosPorMes[i] + '</span>';
+        html += '</div><span class="mes-label">' + meses[i] + '</span></div>';
       }
-      
-      html += '</div>';
-      html += '</div>';
-      
-      return html;
+      return html + '</div></div>';
     }
 
-    // ===== GRÁFICO DE LÍNEAS (COMPARAR AÑOS) =====
     function renderGraficoLineas(leidos) {
       var meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-      
       var anos = obtenerAniosDisponibles(leidos);
       if (anos.length === 0) return '';
-      
+
       var datosAnos = {};
       anos.forEach(function(ano) {
         var librosPorMes = Array(12).fill(0);
         leidos.forEach(function(libro) {
-          var anio = obtenerAnio(libro.fecha);
-          var mes = obtenerMes(libro.fecha);
-          if (anio === ano && mes !== null && mes >= 1 && mes <= 12) {
-            librosPorMes[mes - 1]++;
+          if (obtenerAnio(libro.fecha) === ano) {
+            var mes = obtenerMes(libro.fecha);
+            if (mes !== null && mes >= 1 && mes <= 12) librosPorMes[mes - 1]++;
           }
         });
         datosAnos[ano] = librosPorMes;
       });
-      
+
       var maxValor = 1;
       for (var ano in datosAnos) {
         var maxAno = Math.max.apply(null, datosAnos[ano]);
         if (maxAno > maxValor) maxValor = maxAno;
       }
-      
+
       var colores = ['#8a7a5c', '#b8926a', '#6a8a7a', '#8a6a8a', '#6a7a8a', '#7a8a6a'];
-      
-      var ancho = 700;
-      var alto = 200;
+      var ancho = 700, alto = 200;
       var padding = { top: 20, bottom: 30, left: 30, right: 20 };
       var graficoAncho = ancho - padding.left - padding.right;
       var graficoAlto = alto - padding.top - padding.bottom;
-      
-      var puntos = 12;
-      var pasoX = graficoAncho / (puntos - 1);
-      
+      var pasoX = graficoAncho / 11;
+
       var svg = '<svg class="grafico-svg" viewBox="0 0 ' + ancho + ' ' + alto + '" xmlns="http://www.w3.org/2000/svg">';
-      
       svg += '<g transform="translate(' + padding.left + ',' + (alto - padding.bottom) + ')">';
       svg += '<line x1="0" y1="0" x2="' + graficoAncho + '" y2="0" stroke="var(--borde)" stroke-width="1"/>';
-      for (var i = 0; i < puntos; i++) {
+      for (var i = 0; i < 12; i++) {
         var x = i * pasoX;
         svg += '<line x1="' + x + '" y1="0" x2="' + x + '" y2="4" stroke="var(--borde)" stroke-width="1"/>';
         svg += '<text x="' + x + '" y="18" text-anchor="middle" font-size="10" fill="var(--texto-suave)">' + meses[i] + '</text>';
       }
       svg += '</g>';
-      
+
       svg += '<g transform="translate(' + padding.left + ',' + padding.top + ')">';
       var numLineas = Math.min(5, maxValor);
       if (numLineas < 1) numLineas = 1;
@@ -2175,80 +1978,53 @@
         svg += '<text x="-6" y="' + (y + 4) + '" text-anchor="end" font-size="9" fill="var(--texto-suave)">' + valor + '</text>';
       }
       svg += '</g>';
-      
+
       var indexAno = 0;
       for (var ano in datosAnos) {
         var color = colores[indexAno % colores.length];
         var datos = datosAnos[ano];
-        
-        var pathD = '';
         var puntosPath = [];
-        var primerPunto = true;
         for (var i = 0; i < datos.length; i++) {
           var x = padding.left + i * pasoX;
           var y = padding.top + graficoAlto - (datos[i] / maxValor) * graficoAlto;
-          if (primerPunto) {
-            pathD += 'M ' + x + ' ' + y;
-            primerPunto = false;
-          } else {
-            pathD += ' L ' + x + ' ' + y;
-          }
           puntosPath.push({ x: x, y: y, valor: datos[i] });
         }
-        
-        svg += '<polyline points="' + pathD.replace(/[ML]/g, '').trim() + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>';
-        
-        for (var i = 0; i < puntosPath.length; i++) {
-          var p = puntosPath[i];
-          if (p.valor > 0) {
-            svg += '<circle cx="' + p.x + '" cy="' + p.y + '" r="3.5" fill="' + color + '" opacity="0.9"/>';
-          }
-        }
-        
+        var pointsStr = puntosPath.map(function(p) { return p.x + ',' + p.y; }).join(' ');
+        svg += '<polyline points="' + pointsStr + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>';
+        puntosPath.forEach(function(p) {
+          if (p.valor > 0) svg += '<circle cx="' + p.x + '" cy="' + p.y + '" r="3.5" fill="' + color + '" opacity="0.9"/>';
+        });
         indexAno++;
       }
-      
       svg += '</svg>';
-      
+
       var leyenda = '<div class="linea-leyenda">';
       var idx = 0;
       for (var ano in datosAnos) {
         var color = colores[idx % colores.length];
-        leyenda += '<span class="leyenda-item">';
-        leyenda += '<span class="color-muestra" style="background-color:' + color + ';"></span>';
-        leyenda += ano;
-        leyenda += '</span>';
+        leyenda += '<span class="leyenda-item"><span class="color-muestra" style="background-color:' + color + ';"></span>' + ano + '</span>';
         idx++;
       }
       leyenda += '</div>';
-      
-      var html = '<div class="grafico-lineas">';
-      html += '<div class="grafico-titulo">Comparativa anual por meses</div>';
-      html += svg;
-      html += leyenda;
-      html += '</div>';
-      
-      return html;
+
+      return '<div class="grafico-lineas"><div class="grafico-titulo">Comparativa anual por meses</div>' + svg + leyenda + '</div>';
     }
 
     function renderEstadisticas() {
       var leidos = cargar(CLAVE_LEIDOS);
-      
       var librosFiltrados = leidos;
       if (filtroAno !== 'todos') {
         librosFiltrados = leidos.filter(function(libro) {
-          var anio = obtenerAnio(libro.fecha);
-          return anio === filtroAno;
+          return obtenerAnio(libro.fecha) === filtroAno;
         });
       }
-      
+
       var total = librosFiltrados.length;
-      var mediaEstrellas = 0;
-      var librosConPuntuacion = 0;
+      var mediaEstrellas = 0, librosConPuntuacion = 0;
       var citas = [];
 
       librosFiltrados.forEach(function(libro) {
-        if (typeof libro.puntuacion !== 'undefined' && libro.puntuacion > 0) {
+        if (libro.puntuacion && libro.puntuacion > 0) {
           librosConPuntuacion++;
           mediaEstrellas += libro.puntuacion;
         }
@@ -2259,12 +2035,9 @@
         }
       });
 
-      if (librosConPuntuacion > 0) {
-        mediaEstrellas = (mediaEstrellas / librosConPuntuacion).toFixed(1);
-      }
+      if (librosConPuntuacion > 0) mediaEstrellas = (mediaEstrellas / librosConPuntuacion).toFixed(1);
 
       var html = '<div class="estadisticas-container">';
-      
       var anos = obtenerAniosDisponibles(leidos);
       html += '<div class="filtro-anos">';
       html += '<button class="' + (filtroAno === 'todos' ? 'activo' : '') + '" data-ano="todos">Todos</button>';
@@ -2272,7 +2045,7 @@
         html += '<button class="' + (filtroAno === ano ? 'activo' : '') + '" data-ano="' + ano + '">' + ano + '</button>';
       });
       html += '</div>';
-      
+
       html += '<div class="estadisticas">';
       html += '<div class="stat"><div class="numero">' + total + '</div><div class="label">Libros leídos</div></div>';
       html += '<div class="stat"><div class="numero">' + mediaEstrellas + ' ★</div><div class="label">Media estrellas</div></div>';
@@ -2281,10 +2054,7 @@
       if (filtroAno !== 'todos' && total > 0) {
         html += renderGraficoMensual(librosFiltrados, filtroAno);
       } else if (filtroAno === 'todos') {
-        var graficoLineas = renderGraficoLineas(leidos);
-        if (graficoLineas) {
-          html += graficoLineas;
-        }
+        html += renderGraficoLineas(leidos);
       }
 
       if (citas.length > 0) {
@@ -2296,7 +2066,7 @@
           html += '</div>';
         });
       } else {
-        html += '<div class="lista-vacia">Aún no hay citas destacadas. Añade citas a tus libros.</div>';
+        html += '<div class="lista-vacia">Aún no hay citas destacadas.</div>';
       }
 
       html += '</div>';
@@ -2305,11 +2075,7 @@
       document.querySelectorAll('.filtro-anos button').forEach(function(btn) {
         btn.addEventListener('click', function() {
           filtroAno = this.getAttribute('data-ano');
-          if (filtroAno === 'todos') {
-            filtroAno = 'todos';
-          } else {
-            filtroAno = parseInt(filtroAno);
-          }
+          if (filtroAno !== 'todos') filtroAno = parseInt(filtroAno);
           renderEstadisticas();
         });
       });
@@ -2319,23 +2085,22 @@
       var anos = new Set();
       leidos.forEach(function(libro) {
         var anio = obtenerAnio(libro.fecha);
-        if (anio !== null) {
-          anos.add(anio);
-        }
+        if (anio !== null) anos.add(anio);
       });
       return Array.from(anos).sort(function(a, b) { return b - a; });
     }
 
+    // ============================================================
+    // ACCIONES PRINCIPALES
+    // ============================================================
     function anadirLibro() {
       var titulo = inputTitulo.value.trim();
       var autor = inputAutor.value.trim();
-      if (!titulo) {
-        inputTitulo.focus();
-        return;
-      }
+      if (!titulo) { inputTitulo.focus(); return; }
       var libros = cargar(CLAVE_PARA_LEER);
       libros.unshift({ titulo: titulo, autor: autor, citas: [] });
       guardar(CLAVE_PARA_LEER, libros);
+      guardarEnNube();
       inputTitulo.value = "";
       inputAutor.value = "";
       inputTitulo.focus();
@@ -2350,15 +2115,10 @@
       libro.puntuacion = 0;
       libro.fecha = obtenerFechaActual();
       if (!libro.citas) libro.citas = [];
-      // Si había una cita antigua en el campo 'cita', la migramos
-      if (libro.cita && libro.cita.trim()) {
-        if (!libro.citas) libro.citas = [];
-        libro.citas.push(libro.cita);
-        libro.cita = '';
-      }
       leidos.unshift(libro);
       guardar(CLAVE_PARA_LEER, paraLeer);
       guardar(CLAVE_LEIDOS, leidos);
+      guardarEnNube();
       renderParaLeer();
       renderLeidos();
       renderEstadisticas();
@@ -2400,17 +2160,15 @@
       renderLeidos();
     }
 
-    function cambiarOrdenLeidos() {
-      renderLeidos();
-    }
-
+    // ============================================================
+    // EXPORTAR / IMPORTAR (respaldo manual)
+    // ============================================================
     function exportarDatos() {
       var datos = {
         paraLeer: cargar(CLAVE_PARA_LEER),
         leidos: cargar(CLAVE_LEIDOS),
         fecha: new Date().toISOString()
       };
-      
       var blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
       var url = URL.createObjectURL(blob);
       var a = document.createElement("a");
@@ -2425,27 +2183,15 @@
     function importarDatos(evento) {
       var archivo = evento.target.files[0];
       if (!archivo) return;
-
       var lector = new FileReader();
       lector.onload = function(e) {
         try {
           var datos = JSON.parse(e.target.result);
-          
-          if (typeof datos.paraLeer !== 'undefined' && typeof datos.leidos !== 'undefined') {
-            if (confirm("¿Importar datos? Se sobrescribirán los datos actuales.")) {
-              // Asegurar que los libros tengan el campo citas
-              if (datos.paraLeer) {
-                datos.paraLeer.forEach(function(libro) {
-                  if (!libro.citas) libro.citas = [];
-                });
-              }
-              if (datos.leidos) {
-                datos.leidos.forEach(function(libro) {
-                  if (!libro.citas) libro.citas = [];
-                });
-              }
+          if (datos.paraLeer !== undefined && datos.leidos !== undefined) {
+            if (confirm("¿Importar datos? Se sobrescribirán los actuales (local y nube).")) {
               guardar(CLAVE_PARA_LEER, datos.paraLeer);
               guardar(CLAVE_LEIDOS, datos.leidos);
+              guardarEnNube();
               renderParaLeer();
               renderLeidos();
               renderEstadisticas();
@@ -2460,33 +2206,33 @@
         }
       };
       lector.readAsText(archivo);
-      
       inputArchivo.value = "";
     }
 
+    // ============================================================
+    // INICIALIZACIÓN
+    // ============================================================
     botonAnadir.addEventListener("click", anadirLibro);
-    inputAutor.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") anadirLibro();
-    });
-    inputTitulo.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") inputAutor.focus();
-    });
+    inputAutor.addEventListener("keydown", function (e) { if (e.key === "Enter") anadirLibro(); });
+    inputTitulo.addEventListener("keydown", function (e) { if (e.key === "Enter") inputAutor.focus(); });
     tabParaLeer.addEventListener("click", mostrarParaLeer);
     tabLeidos.addEventListener("click", mostrarLeidos);
     tabEstadisticas.addEventListener("click", mostrarEstadisticas);
     ordenDirectionLeidos.addEventListener("click", toggleDirectionLeidos);
-    ordenCampoLeidos.addEventListener("change", cambiarOrdenLeidos);
+    ordenCampoLeidos.addEventListener("change", renderLeidos);
     busquedaLeidos.addEventListener("input", renderLeidos);
     btnExportar.addEventListener("click", exportarDatos);
-    btnImportar.addEventListener("click", function() {
-      inputArchivo.click();
-    });
+    btnImportar.addEventListener("click", function() { inputArchivo.click(); });
     inputArchivo.addEventListener("change", importarDatos);
 
-    renderParaLeer();
-    renderLeidos();
-    renderEstadisticas();
-    actualizarBadges();
+    // Cargar desde la nube al iniciar
+    (async function init() {
+      await cargarDesdeNube();
+      renderParaLeer();
+      renderLeidos();
+      renderEstadisticas();
+      actualizarBadges();
+    })();
   </script>
 </body>
 </html>
